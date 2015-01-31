@@ -4,31 +4,25 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.eddyluo.bubathroomlocator.MainActivity"
+    tools:context="com.eddyluo.bucommunityapp.MainActivity"
     tools:ignore="MergeRootFrame">
-
+	<!-- 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="90"
         >
 
-		<Button
-		    android:id="@+id/bCRCampus"
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    android:layout_weight="50"
-		    android:text="@string/charles_river" />
-
-		<Button
-		    android:id="@+id/bMedCampus"
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    android:layout_weight="50"
-		    android:text="@string/medical" />
+        <SearchView
+            android:id="@+id/searchView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:queryHint="@string/find_building"
+            >
+        </SearchView>
 
     </LinearLayout>
-
+	-->
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
