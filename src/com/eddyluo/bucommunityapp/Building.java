@@ -14,7 +14,7 @@ import com.google.android.gms.maps.model.PolygonOptions;
 public class Building {
 	public ArrayList<LatLng> coords; // Coordinates of the building
 	public String name;              // Name of the building
-	public String fullName;
+	public String fullName;          // Full name of the building
 	private PolygonOptions poBuilding; // Polygon Data
 	private Polygon buildingOnMap;    // Building on the map
 	
@@ -81,6 +81,11 @@ public class Building {
 	public Polygon getPolygon() {
 		return buildingOnMap;
 	}
+	
+	public void setColor(int color) {
+		buildingOnMap.setFillColor(color);
+	}
+	
     private PolygonOptions makePolygon(ArrayList<LatLng> arg) {
 	    LatLng[] data = arg.toArray(new LatLng[arg.size()]);
 	    PolygonOptions polygonOptions = new PolygonOptions();

@@ -92,14 +92,14 @@ public class MainActivity extends ActionBarActivity {
 					if (bLoc.isPointInPolygon(tap)) {
 						// The following is mostly placeholder until I make the new activity for indoor maps.
 						BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(bLoc.getCenterCoordinate(), 16.0f)); 
+						bLoc.setColor(Color.BLUE);
 						Context polygonpressed = getApplicationContext();
 						String polygonwriting = bLoc.name +" pressed."; 
-						Toast wtfan = Toast.makeText(polygonpressed, polygonwriting, explanationDuration);
+						Toast wtfan = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
 						wtfan.show();
 					}
 				}			
 			}
-			
 		});
 		
 	}
@@ -109,8 +109,8 @@ public class MainActivity extends ActionBarActivity {
 		/* By default, all BU buildings are visible and marked in
 		 * red. Options label all buildings by their 3-4 digit code.
 		 */
-		String findBuildingName = getResources().getString(R.string.find_building);
-		tExplanation = "To select a building, choose '".concat(findBuildingName).concat("' from the Options menu.");
+		// String findBuildingName = getResources().getString(R.string.find_building);
+		// tExplanation = "To select a building, choose '".concat(findBuildingName).concat("' from the Options menu.");
 	}
 	
 	@Override
