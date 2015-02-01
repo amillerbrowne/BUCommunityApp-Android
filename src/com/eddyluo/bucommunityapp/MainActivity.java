@@ -98,7 +98,7 @@ public class MainActivity extends ActionBarActivity {
 						BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(bLoc.getCenterCoordinate(), 16.0f)); 
 						bLoc.setColor(Color.BLUE);
 						Context polygonpressed = getApplicationContext();
-						String polygonwriting = bLoc.name +" pressed."; 
+						String polygonwriting = bLoc.fullName +" pressed."; 
 						Toast wtfan = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
 						wtfan.show();
 					}
