@@ -55,6 +55,7 @@ public class MainActivity extends ActionBarActivity {
 			BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
 		}
 		initializeVars(BUmap);
+		
 		final ArrayList<Building> BUBuildings = new ArrayList<Building>();
 		ArrayList<LatLng> vertices = new ArrayList<LatLng>(); // initializes a list of vertices
 		ArrayList<LatLng> alPho = new ArrayList<LatLng>();
@@ -62,8 +63,11 @@ public class MainActivity extends ActionBarActivity {
 		CSVFile csvFile = new CSVFile(inputStream);
 		List<String[]> buildingList = csvFile.read();
 		String buildingCode;
+		String officialName;
+		
 		for (String[] bOptions : buildingList) { // this class places buildings into the arraylist
 			buildingCode = bOptions[0]; // initializes building code
+			officialName = bOptions[1]; // initializes full name
 			for (int ii = startCoordIterator; ii < bOptions.length; ii++) {
 				if ((bOptions[ii].toString()).length() != 0) {
 					String[] latAndLong = bOptions[ii].split(","); // error happens here?
@@ -72,7 +76,7 @@ public class MainActivity extends ActionBarActivity {
 					vertices.add(new LatLng(latitude, longitude)); // adds the vertex to the thing
 				}
 			}
-			BUBuildings.add(new Building(vertices, buildingCode)); // finally adds the building
+			BUBuildings.add(new Building(vertices, buildingCode, officialName)); // finally adds the building
 			vertices.clear();
 		}
 		for (Building buildingToAdd: BUBuildings) {
