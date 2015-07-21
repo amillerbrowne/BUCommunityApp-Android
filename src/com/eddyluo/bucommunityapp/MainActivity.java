@@ -1,11 +1,7 @@
 package com.eddyluo.bucommunityapp;
 
 /*
- * Alright, here's a thing I made with the purpose of being funny.
- * And then it became serious. Go figure.
- * Things I need help with: A lot
  * I'd like for the code to be more organized.
- * 
  * 
  */
 
