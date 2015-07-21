@@ -47,13 +47,13 @@ public class MainActivity extends ActionBarActivity {
 	CharSequence tExplanation;
 	int explanationDuration = Toast.LENGTH_LONG; // When toasts appear, they stay on screen for the maximum default length.
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		final GoogleMap BUmap = ((MapFragment)getFragmentManager().findFragmentById(R.id.MapFragment)).getMap();
-		if (BUmap != null) {
-			BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
-		}
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        final GoogleMap BUmap = ((MapFragment)getFragmentManager().findFragmentById(R.id.MapFragment)).getMap();
+        if (BUmap != null) {
+            BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
+        }
 		initializeVars(BUmap);
 		
 		final ArrayList<Building> BUBuildings = new ArrayList<Building>();
@@ -68,6 +68,7 @@ public class MainActivity extends ActionBarActivity {
 		for (String[] bOptions : buildingList) { // this class places buildings into the arraylist
 			buildingCode = bOptions[0]; // initializes building code
 			officialName = bOptions[1]; // initializes full name
+			// originalColor = bOptions[2]; // initializes color of building
 			for (int ii = startCoordIterator; ii < bOptions.length; ii++) {
 				if ((bOptions[ii].toString()).length() != 0) {
 					String[] latAndLong = bOptions[ii].split(","); // error happens here?
@@ -95,12 +96,17 @@ public class MainActivity extends ActionBarActivity {
 				for (Building bLoc: BUBuildings) {
 					if (bLoc.isPointInPolygon(tap)) {
 						// The following is mostly placeholder until I make the new activity for indoor maps.
-						BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(bLoc.getCenterCoordinate(), 16.0f)); 
+                        if (bLoc.getColor() == Color.BLUE) {
+                        	
+                        }
+						BUmap.moveCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate())); 
 						bLoc.setColor(Color.BLUE);
 						Context polygonpressed = getApplicationContext();
 						String polygonwriting = bLoc.fullName +" pressed."; 
-						Toast wtfan = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
-						wtfan.show();
+						Toast tDispName = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
+						tDispName.show();
+					} else {
+						bLoc.setColor(Color.RED);
 					}
 				}			
 			}

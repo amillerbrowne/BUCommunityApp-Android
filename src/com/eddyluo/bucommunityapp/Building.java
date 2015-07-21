@@ -86,6 +86,10 @@ public class Building {
 		buildingOnMap.setFillColor(color);
 	}
 	
+	public int getColor() {
+		return buildingOnMap.getFillColor();
+	}
+	
     private PolygonOptions makePolygon(ArrayList<LatLng> arg) {
 	    LatLng[] data = arg.toArray(new LatLng[arg.size()]);
 	    PolygonOptions polygonOptions = new PolygonOptions();
