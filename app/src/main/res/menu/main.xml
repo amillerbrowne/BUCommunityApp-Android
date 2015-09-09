@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.eddyluo.bubathroomlocator.MainActivity" >
+
+    <item android:id="@+id/iFindBuilding" 
+        android:title="@string/find_building" 
+        android:orderInCategory="100">
+        
+    </item>
+    <item android:id="@+id/displayNamesSwitch" android:orderInCategory="103" android:title="@string/toggleNames"></item><item android:id="@+id/switch_to_CRC" android:orderInCategory="105" android:title="@string/go_to_CRC"></item>
+    <item android:id="@+id/switch_to_MED" android:orderInCategory="110" android:title="@string/go_to_MED"></item>
+    
+
+</menu>
