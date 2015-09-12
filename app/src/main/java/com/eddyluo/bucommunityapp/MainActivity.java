@@ -28,6 +28,7 @@ public class MainActivity extends ActionBarActivity {
 	private static final LatLng GSU = new LatLng(42.351028, -71.109000);
 	private static final LatLng MED = new LatLng(42.336238, -71.072367);
 	final int startCoordIterator = 2; // change based on the index of the first coordinate of the building
+	GoogleMap BUmap;
 	boolean displayBuildingNames = true;
 	CharSequence tExplanation = "Tap a building to find its name!";
 	int explanationDuration = Toast.LENGTH_LONG; // When toasts appear, they stay on screen for the maximum default length.
@@ -35,7 +36,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final GoogleMap BUmap = ((MapFragment)getFragmentManager().findFragmentById(R.id.MapFragment)).getMap();
+        BUmap = ((MapFragment)getFragmentManager().findFragmentById(R.id.MapFragment)).getMap();
         if (BUmap != null) {
             BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
         }
@@ -86,7 +87,7 @@ public class MainActivity extends ActionBarActivity {
 						BUmap.moveCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate())); 
 						bLoc.setColor(Color.BLUE);
 						Context polygonpressed = getApplicationContext();
-						String polygonwriting = bLoc.fullName +" pressed."; 
+						String polygonwriting = bLoc.fullName + " (" + bLoc.name + ") pressed.";
 						Toast tDispName = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
 						tDispName.show();
 					} else {
@@ -115,7 +116,7 @@ public class MainActivity extends ActionBarActivity {
 		return true;
 	}
 	
-	public boolean onOptionsItemSelected(MenuItem item, GoogleMap BUmap) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
