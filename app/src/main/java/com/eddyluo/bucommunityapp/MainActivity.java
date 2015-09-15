@@ -2,8 +2,8 @@ package com.eddyluo.bucommunityapp;
 
 /*
  * I'd like for the code to be more organized.
- * 
- */
+ *
+*/
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class MainActivity extends ActionBarActivity {
 	private static final LatLng GSU = new LatLng(42.351028, -71.109000);
 	private static final LatLng MED = new LatLng(42.336238, -71.072367);
 	final int startCoordIterator = 2; // change based on the index of the first coordinate of the building
-	GoogleMap BUmap;
+	GoogleMap BUmap; // class variable used for the map
 	boolean displayBuildingNames = true;
 	CharSequence tExplanation = "Tap a building to find its name!";
 	int explanationDuration = Toast.LENGTH_LONG; // When toasts appear, they stay on screen for the maximum default length.
