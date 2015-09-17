@@ -15,6 +15,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
+
+import android.location.LocationManager;
 import android.support.v7.app.ActionBarActivity;
 import android.content.Context;
 import android.graphics.Color;
@@ -29,9 +31,10 @@ public class MainActivity extends ActionBarActivity {
 	private static final LatLng MED = new LatLng(42.336238, -71.072367);
 	final int startCoordIterator = 2; // change based on the index of the first coordinate of the building
 	GoogleMap BUmap; // class variable used for the map
+    LocationManager locationManager;
 	boolean displayBuildingNames = true;
 	CharSequence tExplanation = "Tap a building to find its name!";
-	int explanationDuration = Toast.LENGTH_LONG; // When toasts appear, they stay on screen for the maximum default length.
+	int explanationDuration = Toast.LENGTH_LONG;
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +42,9 @@ public class MainActivity extends ActionBarActivity {
         BUmap = ((MapFragment)getFragmentManager().findFragmentById(R.id.MapFragment)).getMap();
         if (BUmap != null) {
             BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
+            BUmap.setMyLocationEnabled(true); // location shown on map. plan to show which building you're in
         }
+		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE); //
 		final ArrayList<Building> BUBuildings = new ArrayList<Building>();
 		ArrayList<LatLng> vertices = new ArrayList<LatLng>(); // initializes a list of vertices
 		InputStream inputStream = getResources().openRawResource(R.raw.buildinglist);
