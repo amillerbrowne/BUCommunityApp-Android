@@ -40,11 +40,8 @@ public class MainActivity extends ActionBarActivity {
         if (BUmap != null) {
             BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
         }
-		initializeVars(BUmap);
-		
 		final ArrayList<Building> BUBuildings = new ArrayList<Building>();
 		ArrayList<LatLng> vertices = new ArrayList<LatLng>(); // initializes a list of vertices
-		ArrayList<LatLng> alPho = new ArrayList<LatLng>();
 		InputStream inputStream = getResources().openRawResource(R.raw.buildinglist);
 		CSVFile csvFile = new CSVFile(inputStream);
 		List<String[]> buildingList = csvFile.read();
@@ -57,7 +54,7 @@ public class MainActivity extends ActionBarActivity {
 			// originalColor = bOptions[2]; // initializes color of building
 			for (int ii = startCoordIterator; ii < bOptions.length; ii++) {
 				if ((bOptions[ii].toString()).length() != 0) {
-					String[] latAndLong = bOptions[ii].split(","); // error happens here?
+					String[] latAndLong = bOptions[ii].split(",");
 					double latitude = Double.parseDouble(latAndLong[0]);
 					double longitude = Double.parseDouble(latAndLong[1]);
 					vertices.add(new LatLng(latitude, longitude)); // adds the vertex to the thing
@@ -99,15 +96,6 @@ public class MainActivity extends ActionBarActivity {
 		
 	}
 
-	public void initializeVars(GoogleMap map) {
-		// Initializes all buttons to their XML locations.
-		/* By default, all BU buildings are visible and marked in
-		 * red. Options label all buildings by their 3-4 digit code.
-		 */
-		// String findBuildingName = getResources().getString(R.string.find_building);
-		// tExplanation = "To select a building, choose '".concat(findBuildingName).concat("' from the Options menu.");
-	}
-	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -121,12 +109,8 @@ public class MainActivity extends ActionBarActivity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.iFindBuilding) {
-			// Used to test
-			Context bPressed = getApplicationContext();
-			Toast argh = Toast.makeText(bPressed, tExplanation, explanationDuration);
-			argh.show();
-			// Remove after test
+		if (id == R.id.iFindBuilding) { // Should open a search menu
+
 			return true;
 		}
 		if (id == R.id.displayNamesSwitch) {

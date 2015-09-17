@@ -10,6 +10,7 @@
         <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/../../BUCommunityApp-Android/assets" />
         <option name="LIBS_FOLDER_RELATIVE_PATH" value="/../../BUCommunityApp-Android/libs" />
         <option name="PROGUARD_LOGS_FOLDER_RELATIVE_PATH" value="/../../BUCommunityApp-Android/proguard_logs" />
+        <option name="UPDATE_PROPERTY_FILES" value="true" />
       </configuration>
     </facet>
   </component>
@@ -22,4 +23,3 @@
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
-
