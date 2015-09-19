@@ -29,7 +29,7 @@ public class MainActivity extends ActionBarActivity {
 	
 	private static final LatLng GSU = new LatLng(42.351028, -71.109000);
 	private static final LatLng MED = new LatLng(42.336238, -71.072367);
-	final int startCoordIterator = 2; // change based on the index of the first coordinate of the building
+	final int startCoordIterator = 3; // change based on the index of the first coordinate of the building
 	GoogleMap BUmap; // class variable used for the map
     LocationManager locationManager;
 	boolean displayBuildingNames = true;
@@ -52,11 +52,11 @@ public class MainActivity extends ActionBarActivity {
 		List<String[]> buildingList = csvFile.read();
 		String buildingCode;
 		String officialName;
-		
+		String buildingType;
 		for (String[] bOptions : buildingList) { // this class places buildings into the arraylist
 			buildingCode = bOptions[0]; // initializes building code
 			officialName = bOptions[1]; // initializes full name
-			// originalColor = bOptions[2]; // initializes color of building
+			buildingType = bOptions[2]; // initializes color of building
 			for (int ii = startCoordIterator; ii < bOptions.length; ii++) {
 				if ((bOptions[ii].toString()).length() != 0) {
 					String[] latAndLong = bOptions[ii].split(",");
@@ -65,7 +65,7 @@ public class MainActivity extends ActionBarActivity {
 					vertices.add(new LatLng(latitude, longitude)); // adds the vertex to the thing
 				}
 			}
-			BUBuildings.add(new Building(vertices, buildingCode, officialName)); // finally adds the building
+			BUBuildings.add(new Building(vertices, buildingCode, officialName, buildingType)); // finally adds the building
 			vertices.clear();
 		}
 		for (Building buildingToAdd: BUBuildings) {
@@ -93,7 +93,7 @@ public class MainActivity extends ActionBarActivity {
 						Toast tDispName = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
 						tDispName.show();
 					} else {
-						bLoc.setColor(Color.RED);
+						bLoc.setColor(bLoc.originalColor);
 					}
 				}			
 			}

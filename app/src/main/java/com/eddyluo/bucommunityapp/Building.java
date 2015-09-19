@@ -15,6 +15,8 @@ public class Building {
 	public ArrayList<LatLng> coords; // Coordinates of the building
 	public String name;              // Name of the building
 	public String fullName;          // Full name of the building
+    public String type;              // Type of building
+    public int originalColor;        // Original color of the building
 	private PolygonOptions poBuilding; // Polygon Data
 	private Polygon buildingOnMap;    // Building on the map
 	
@@ -23,6 +25,7 @@ public class Building {
 		coords = new ArrayList<LatLng>(Arrays.asList(initialCoords));
 		name = initialName;
 		poBuilding = makePolygon(coords);
+        originalColor = Color.rgb(204,0,0);
 	}
 	
 	public Building(ArrayList<LatLng> initialCoords, String initialName) { // accepts arraylist
@@ -30,13 +33,28 @@ public class Building {
 		coords = initialCoords;
 		name = initialName;
 		poBuilding = makePolygon(coords);
+        originalColor = Color.rgb(204,0,0);
 	}
 	
-	public Building(ArrayList<LatLng> initialCoords, String initialName, String wholeName) { // accepts arraylist
+	public Building(ArrayList<LatLng> initialCoords, String initialName, String wholeName, String buildingType) { // accepts arraylist
 		// Adds coordinates to an Array List
 		coords = initialCoords;
 		name = initialName; // building code
 		fullName = wholeName; // full name of the building
+		type = buildingType;
+        switch (buildingType) {
+            case "residence":
+                originalColor = Color.rgb(1,70,32); // dark green
+                break;
+            case "services":
+                originalColor = Color.rgb(204,153,255);
+                break;
+            case "athletic":
+                originalColor = Color.rgb(204,102,0);
+                break;
+            default: // educational buildings
+                originalColor = Color.rgb(204,0,0);
+        }
 		poBuilding = makePolygon(coords);
 	}
 	
@@ -95,7 +113,7 @@ public class Building {
 	    PolygonOptions polygonOptions = new PolygonOptions();
 	    for(int i=0; i < (data.length); i++) {
 		        polygonOptions.add(data[i]).strokeWidth(2);
-		        polygonOptions.fillColor(Color.RED);
+		        polygonOptions.fillColor(originalColor);
 		    }
 		return polygonOptions;
     }
