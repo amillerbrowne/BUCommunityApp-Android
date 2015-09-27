@@ -47,7 +47,7 @@ public class Building {
                 originalColor = Color.rgb(1,70,32); // dark green
                 break;
             case "services":
-                originalColor = Color.rgb(204,153,255);
+                originalColor = Color.rgb(204,153,255); // pink
                 break;
             case "athletic":
                 originalColor = Color.rgb(204,102,0);

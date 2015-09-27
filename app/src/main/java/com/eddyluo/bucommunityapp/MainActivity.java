@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
@@ -32,6 +33,7 @@ public class MainActivity extends ActionBarActivity {
 	final int startCoordIterator = 3; // change based on the index of the first coordinate of the building
 	GoogleMap BUmap; // class variable used for the map
     LocationManager locationManager;
+	SearchView buildingSearch;
 	boolean displayBuildingNames = true;
 	CharSequence tExplanation = "Tap a building to find its name!";
 	int explanationDuration = Toast.LENGTH_LONG;
@@ -114,18 +116,6 @@ public class MainActivity extends ActionBarActivity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.iFindBuilding) { // Should open a search menu
-
-			return true;
-		}
-		if (id == R.id.displayNamesSwitch) {
-			if (displayBuildingNames == true) {
-				displayBuildingNames = false;
-			} else {
-				displayBuildingNames = true;
-			}
-			return true;
-		}
 		if (id == R.id.switch_to_CRC) {
 			BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
 			return true;
