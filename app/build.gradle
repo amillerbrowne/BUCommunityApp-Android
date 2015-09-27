@@ -8,6 +8,8 @@ android {
         applicationId "com.eddyluo.bucommunityapp"
         minSdkVersion 11
         targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
     }
 
     buildTypes {
@@ -21,6 +23,6 @@ android {
 dependencies {
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.google.android.gms:play-services:+'
-    compile 'com.android.support:appcompat-v7:19.1.0'
+    compile 'com.android.support:appcompat-v7:21.0.3'
     compile files('libs/Parse-1.8.2.jar')
 }

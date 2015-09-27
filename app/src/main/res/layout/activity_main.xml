@@ -6,23 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.eddyluo.bucommunityapp.MainActivity"
     tools:ignore="MergeRootFrame">
-	<!-- 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="90"
-        >
 
-        <SearchView
-            android:id="@+id/searchView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:queryHint="@string/find_building"
-            >
-        </SearchView>
-
-    </LinearLayout>
-	-->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
