@@ -20,12 +20,22 @@ public class SearchableActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.building_search_results);
         Intent intent = getIntent();
+        handleIntent(intent);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            // Receive the query
             String query = intent.getStringExtra(SearchManager.QUERY);
-            // Search method..
-            // doMySearch(query);
+            // put code from solution here
+
         }
     }
 }
