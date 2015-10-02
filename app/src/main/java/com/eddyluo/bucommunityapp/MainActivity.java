@@ -16,6 +16,7 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import android.app.SearchManager;
 import android.location.LocationManager;
 import android.support.v7.app.ActionBarActivity;
 import android.content.Context;
@@ -23,7 +24,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.SearchView;
+import android.support.v7.widget.SearchView;
 import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
@@ -34,7 +35,6 @@ public class MainActivity extends ActionBarActivity {
 	GoogleMap BUmap; // class variable used for the map
     LocationManager locationManager;
 	SearchView buildingSearch;
-	boolean displayBuildingNames = true;
 	CharSequence tExplanation = "Tap a building to find its name!";
 	int explanationDuration = Toast.LENGTH_LONG;
 	@Override
@@ -106,11 +106,16 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		// Inflate the menu; this adds items to the action bar if it is present.
+		// Inflate the menu; this adds items to the action bar if it is present
 		getMenuInflater().inflate(R.menu.main, menu);
+		// Initiates the search manager
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setQueryHint(getResources().getString(R.string.find_building));
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		return true;
 	}
-	
+
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long

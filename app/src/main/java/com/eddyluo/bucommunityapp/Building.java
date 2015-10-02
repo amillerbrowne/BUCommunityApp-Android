@@ -5,20 +5,23 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.graphics.Color;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
-public class Building {
-	public ArrayList<LatLng> coords; // Coordinates of the building
+public class Building implements Parcelable {
+	// Building name, full name, and type sent in parcel
 	public String name;              // Name of the building
 	public String fullName;          // Full name of the building
     public String type;              // Type of building
-    public int originalColor;        // Original color of the building
-	private PolygonOptions poBuilding; // Polygon Data
-	private Polygon buildingOnMap;    // Building on the map
+    public int originalColor;        // Original color of the building (NOT SENT IN PARCEL)
+	public ArrayList<LatLng> coords; // Coordinates of the building (NOT SENT IN PARCEL)
+	private PolygonOptions poBuilding; // Polygon Data (NOT SENT IN PARCEL)
+	private Polygon buildingOnMap;    // Building on the map (NOT SENT IN PARCEL)
 	
 	public Building(LatLng[] initialCoords, String initialName) { // accepts array
 		// Adds coordinates to an Array List
@@ -33,7 +36,7 @@ public class Building {
 		coords = initialCoords;
 		name = initialName;
 		poBuilding = makePolygon(coords);
-        originalColor = Color.rgb(204,0,0);
+        originalColor = Color.rgb(204, 0, 0);
 	}
 	
 	public Building(ArrayList<LatLng> initialCoords, String initialName, String wholeName, String buildingType) { // accepts arraylist
@@ -42,19 +45,19 @@ public class Building {
 		name = initialName; // building code
 		fullName = wholeName; // full name of the building
 		type = buildingType;
-        switch (buildingType) {
-            case "residence":
-                originalColor = Color.rgb(1,70,32); // dark green
-                break;
-            case "services":
-                originalColor = Color.rgb(204,153,255); // pink
-                break;
-            case "athletic":
-                originalColor = Color.rgb(204,102,0);
-                break;
-            default: // educational buildings
-                originalColor = Color.rgb(204,0,0);
-        }
+		switch (buildingType) {
+			case "residence":
+				originalColor = Color.rgb(1, 70, 32); // dark green
+				break;
+			case "services":
+				originalColor = Color.rgb(204, 153, 255); // pink
+				break;
+			case "athletic":
+				originalColor = Color.rgb(204, 102, 0);
+				break;
+			default: // educational buildings
+				originalColor = Color.rgb(204, 0, 0);
+		}
 		poBuilding = makePolygon(coords);
 	}
 	
@@ -147,5 +150,32 @@ public class Building {
 	    double x = (pY - bee) / m;                  // algebra is neat!
 
 	    return x > pX;
+	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel pc, int flags) {
+        pc.writeString(name);
+        pc.writeString(fullName);
+        pc.writeString(type);
+	}
+    // Object regeneration
+    public static final Parcelable.Creator<Building> CREATOR = new Parcelable.Creator<Building>() {
+        public Building createFromParcel(Parcel pc) {
+            return new Building(pc);
+        }
+        public Building[] newArray(int size) {
+            return new Building[size];
+        }
+    };
+
+	public Building(Parcel pc) { // Used for searching only
+        name = pc.readString();
+        fullName = pc.readString();
+        type = pc.readString();
 	}
 }
