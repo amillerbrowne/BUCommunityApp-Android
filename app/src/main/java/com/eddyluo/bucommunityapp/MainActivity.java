@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.eddyluo.bucommunityapp.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
@@ -17,25 +16,27 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
 import android.app.SearchManager;
+import android.content.Intent;
 import android.location.LocationManager;
-import android.support.v7.app.ActionBarActivity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v7.widget.SearchView;
+import android.widget.SearchView;
 import android.widget.Toast;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 	
 	private static final LatLng GSU = new LatLng(42.351028, -71.109000);
 	private static final LatLng MED = new LatLng(42.336238, -71.072367);
 	final int startCoordIterator = 3; // change based on the index of the first coordinate of the building
 	GoogleMap BUmap; // class variable used for the map
     LocationManager locationManager;
-	SearchView buildingSearch;
+	SearchView searchView;
 	CharSequence tExplanation = "Tap a building to find its name!";
+    ArrayList<Building> BUBuildings = new ArrayList<Building>();
 	int explanationDuration = Toast.LENGTH_LONG;
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +47,7 @@ public class MainActivity extends ActionBarActivity {
             BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
             BUmap.setMyLocationEnabled(true); // location shown on map. plan to show which building you're in
         }
-		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE); //
-		final ArrayList<Building> BUBuildings = new ArrayList<Building>();
+		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		ArrayList<LatLng> vertices = new ArrayList<LatLng>(); // initializes a list of vertices
 		InputStream inputStream = getResources().openRawResource(R.raw.buildinglist);
 		CSVFile csvFile = new CSVFile(inputStream);
@@ -80,27 +80,26 @@ public class MainActivity extends ActionBarActivity {
 
 		
 		BUmap.setOnMapClickListener(new OnMapClickListener() {
-			@Override
-			public void onMapClick(LatLng tap) {
-				for (Building bLoc: BUBuildings) {
-					if (bLoc.isPointInPolygon(tap)) {
-						// The following is mostly placeholder until I make the new activity for indoor maps.
+            @Override
+            public void onMapClick(LatLng tap) {
+                for (Building bLoc : BUBuildings) {
+                    if (bLoc.isPointInPolygon(tap)) {
+                        // The following is mostly placeholder until I make the new activity for indoor maps.
                         if (bLoc.getColor() == Color.BLUE) {
-                        	
+
                         }
-						BUmap.moveCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate())); 
-						bLoc.setColor(Color.BLUE);
-						Context polygonpressed = getApplicationContext();
-						String polygonwriting = bLoc.fullName + " (" + bLoc.name + ") pressed.";
-						Toast tDispName = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
-						tDispName.show();
-					} else {
-						bLoc.setColor(bLoc.originalColor);
-					}
-				}			
-			}
-		});
-		
+                        BUmap.moveCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate()));
+                        bLoc.setColor(Color.BLUE);
+                        Context polygonpressed = getApplicationContext();
+                        String polygonwriting = bLoc.fullName + " (" + bLoc.name + ") pressed.";
+                        Toast tDispName = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
+                        tDispName.show();
+                    } else {
+                        bLoc.setColor(bLoc.originalColor);
+                    }
+                }
+            }
+        });
 	}
 
 	@Override
@@ -108,11 +107,25 @@ public class MainActivity extends ActionBarActivity {
 
 		// Inflate the menu; this adds items to the action bar if it is present
 		getMenuInflater().inflate(R.menu.main, menu);
-		// Initiates the search manager
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+		// Initiates the search manager's options
+        searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         searchView.setQueryHint(getResources().getString(R.string.find_building));
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+		searchView.setIconifiedByDefault(false);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                onSearchRequested();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+        });
 		return true;
 	}
 
@@ -120,16 +133,26 @@ public class MainActivity extends ActionBarActivity {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
+
 		int id = item.getItemId();
 		if (id == R.id.switch_to_CRC) {
 			BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
-			return true;
-		}
-		if (id == R.id.switch_to_MED) {
+            return true;
+        }
+        if (id == R.id.switch_to_MED) {
 			BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(MED, 16.0f));
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
+	@Override
+	public boolean onSearchRequested() {
+		Intent intent = new Intent(this, SearchableActivity.class);
+		intent.putExtra("searchQuery", searchView.getQuery());
+		intent.putParcelableArrayListExtra("buildingNames",BUBuildings);
+		startActivity(intent);
+		return super.onSearchRequested();
+	}
+
 }
