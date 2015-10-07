@@ -85,7 +85,7 @@ public class Building implements Parcelable {
 			} 
 			if (vertices.get(i).longitude < minCoordY) {
 				minCoordY = vertices.get(i).longitude;
-			} else if (vertices.get(i).longitude < maxCoordY) {
+			} else if (vertices.get(i).longitude > maxCoordY) {
 				maxCoordY = vertices.get(i).longitude;
 			}
 		}
