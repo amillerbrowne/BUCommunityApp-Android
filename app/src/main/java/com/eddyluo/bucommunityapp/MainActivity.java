@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         if (bLoc.getColor() == Color.BLUE) {
 
         }
-        BUmap.moveCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate()));
+        BUmap.animateCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate())); // move camera to building
         bLoc.setColor(Color.BLUE);
         Context polygonpressed = getApplicationContext();
         String polygonwriting = bLoc.getFullName() + " (" + bLoc.getName() + ") selected.";
