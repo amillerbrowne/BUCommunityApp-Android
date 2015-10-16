@@ -15,9 +15,9 @@ import com.google.android.gms.maps.model.PolygonOptions;
 
 public class Building implements Parcelable {
 	// Building name, full name, and type sent in parcel
-	public String name;              // Name of the building
-	public String fullName;          // Full name of the building
-    public String type;              // Type of building
+	private String name;              // Name of the building
+	private String fullName;          // Full name of the building
+    private String type;              // Type of building
     public int originalColor;        // Original color of the building (NOT SENT IN PARCEL)
 	public ArrayList<LatLng> coords; // Coordinates of the building (NOT SENT IN PARCEL)
 	private PolygonOptions poBuilding; // Polygon Data (NOT SENT IN PARCEL)
@@ -64,7 +64,19 @@ public class Building implements Parcelable {
 	public void setName(String newName) {
 		name = newName;
 	}
-	
+
+    public String getName() {
+        return name;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
 	public LatLng getCenterCoordinate() {
 		LatLng centerCoordinate;
 		double minCoordX;

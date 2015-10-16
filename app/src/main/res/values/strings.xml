@@ -6,7 +6,8 @@
     <string name="action_settings">Settings</string>
     <string name="charles_river">Charles River</string>
     <string name="medical">Medical Campus</string>
-    <string name="find_building">Find building</string>
+    <string name="find_building">Search by acronym</string>
+    <string name="search_full_name">Search within building name</string>
     <string name="go_to_CRC">Go to Charles River Campus</string>
     <string name="go_to_MED">Go to Medical Campus</string>
     <string name="toggleNames">Toggle Building Names</string>

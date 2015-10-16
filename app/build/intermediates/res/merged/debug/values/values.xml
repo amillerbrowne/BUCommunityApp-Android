@@ -322,7 +322,7 @@
     <string name="decline">Decline</string>
     <!-- From: file:/C:/Users/Edward/StudioProjects/BUCommunityApp-Android/app/src/main/res/values/strings.xml -->
     <eat-comment/>
-    <string name="find_building">Find building</string>
+    <string name="find_building">Search by acronym</string>
     <string name="go_to_CRC">Go to Charles River Campus</string>
     <string name="go_to_MED">Go to Medical Campus</string>
     <string name="hello_world">Hello world!</string>
@@ -339,6 +339,9 @@
     <string name="mr_media_route_controller_stop">Stop casting</string>
     <string name="mr_system_route_name">System</string>
     <string name="mr_user_route_category_name">Devices</string>
+    <!-- From: file:/C:/Users/Edward/StudioProjects/BUCommunityApp-Android/app/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="search_full_name">Search within building name</string>
     <!-- From: file:/C:/Users/Edward/StudioProjects/BUCommunityApp-Android/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
     <eat-comment/>
     <string name="status_bar_notification_info_overflow">999+</string>
