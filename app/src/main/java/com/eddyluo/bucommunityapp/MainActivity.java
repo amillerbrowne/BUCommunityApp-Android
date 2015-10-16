@@ -16,7 +16,6 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
 import android.app.SearchManager;
-import android.content.Intent;
 import android.location.LocationManager;
 import android.content.Context;
 import android.graphics.Color;
@@ -36,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     LocationManager locationManager;
 	SearchView searchView;
 	CharSequence tExplanation = "Tap a building to find its name!";
-    ArrayList<Building> BUBuildings = new ArrayList<Building>();
+    ArrayList<Building> BUBuildings = new ArrayList<>();
 	int explanationDuration = Toast.LENGTH_LONG;
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
             BUmap.setMyLocationEnabled(true); // location shown on map. plan to show which building you're in
         }
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		ArrayList<LatLng> vertices = new ArrayList<LatLng>(); // initializes a list of vertices
+		ArrayList<LatLng> vertices = new ArrayList<>(); // initializes a list of vertices
 		InputStream inputStream = getResources().openRawResource(R.raw.buildinglist);
 		CSVFile csvFile = new CSVFile(inputStream);
 		List<String[]> buildingList = csvFile.read();
@@ -60,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 			officialName = bOptions[1]; // initializes full name
 			buildingType = bOptions[2]; // initializes color of building
 			for (int ii = startCoordIterator; ii < bOptions.length; ii++) {
-				if ((bOptions[ii].toString()).length() != 0) {
+				if ((bOptions[ii]).length() != 0) {
 					String[] latAndLong = bOptions[ii].split(",");
 					double latitude = Double.parseDouble(latAndLong[0]);
 					double longitude = Double.parseDouble(latAndLong[1]);
@@ -84,16 +83,7 @@ public class MainActivity extends AppCompatActivity {
             public void onMapClick(LatLng tap) {
                 for (Building bLoc : BUBuildings) {
                     if (bLoc.isPointInPolygon(tap)) {
-                        // The following is mostly placeholder until I make the new activity for indoor maps.
-                        if (bLoc.getColor() == Color.BLUE) {
-
-                        }
-                        BUmap.moveCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate()));
-                        bLoc.setColor(Color.BLUE);
-                        Context polygonpressed = getApplicationContext();
-                        String polygonwriting = bLoc.fullName + " (" + bLoc.name + ") pressed.";
-                        Toast tDispName = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
-                        tDispName.show();
+                        selectBuilding(bLoc);
                     } else {
                         bLoc.setColor(bLoc.originalColor);
                     }
@@ -122,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // TODO Auto-generated method stub
                 return false;
             }
         });
@@ -146,12 +135,39 @@ public class MainActivity extends AppCompatActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+    public void selectBuilding(Building bLoc) {
+        // Plan: make this show something interesting about the building
+        if (bLoc.getColor() == Color.BLUE) {
+
+        }
+        BUmap.moveCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate()));
+        bLoc.setColor(Color.BLUE);
+        Context polygonpressed = getApplicationContext();
+        String polygonwriting = bLoc.getFullName() + " (" + bLoc.getName() + ") selected.";
+        Toast tDispName = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
+        tDispName.show();
+    }
+
 	@Override
 	public boolean onSearchRequested() {
-		Intent intent = new Intent(this, SearchableActivity.class);
-		intent.putExtra("searchQuery", searchView.getQuery());
-		intent.putParcelableArrayListExtra("buildingNames",BUBuildings);
-		startActivity(intent);
+        String query = searchView.getQuery().toString();
+        boolean buildingFound = false;
+        int iter = 0;
+
+        while (!buildingFound && BUBuildings.size() > iter) {
+            Building toCheck = BUBuildings.get(iter);
+            if (query.equalsIgnoreCase(toCheck.getName())) {
+                buildingFound = true;
+                selectBuilding(toCheck);
+            }
+            iter++;
+        }
+        if (!buildingFound) {
+            Context bNotFound = getApplicationContext();
+            String notFoundMessage = "Building not found.";
+            Toast tDispName = Toast.makeText (bNotFound, notFoundMessage, Toast.LENGTH_SHORT);
+            tDispName.show();
+        }
 		return super.onSearchRequested();
 	}
 
