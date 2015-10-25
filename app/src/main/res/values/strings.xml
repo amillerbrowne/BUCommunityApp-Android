@@ -2,15 +2,15 @@
 <resources>
 
     <string name="app_name">BU Community App</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="charles_river">Charles River</string>
     <string name="medical">Medical Campus</string>
+    <string name="tap_get_name">Tap a building to find its name!</string>
+    <string name="building_chosen">&#160;selected.</string> <!--whitespace character-->
     <string name="find_building">Search by acronym</string>
-    <string name="search_full_name">Search within building name</string>
+    <string name="not_found">Building not found.</string>
     <string name="go_to_CRC">Go to Charles River Campus</string>
     <string name="go_to_MED">Go to Medical Campus</string>
-    <string name="toggleNames">Toggle Building Names</string>
-    <string name="title_activity_indoor_map">IndoorMap</string>
+    <string name="title_activity_indoor_map" translatable="false">IndoorMap</string>
 
 </resources>

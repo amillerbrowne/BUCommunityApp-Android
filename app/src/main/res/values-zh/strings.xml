@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BU Community App</string>
+    <string name="charles_river">查爾士河</string>
+    <string name="go_to_MED">去醫院</string>
+    <string name="go_to_CRC">去查爾士河校园</string>
+    <string name="find_building">簡稱搜索</string>
+    <string name="building_chosen">選擇了</string>
+    <string name="action_settings">設定</string>
+    <string name="medical">醫院</string>
+    <string name="not_found">不可找到</string>
+    <string name="tap_get_name">按一個地方找到了名字！</string>
+</resources>
