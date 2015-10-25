@@ -271,6 +271,9 @@
     <eat-comment/>
     <string name="auth_google_play_services_client_facebook_display_name">Facebook</string>
     <string name="auth_google_play_services_client_google_display_name">Google</string>
+    <!-- From: file:/C:/Users/Edward/StudioProjects/BUCommunityApp-Android/app/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="building_chosen"> selected.</string>
     <!-- From: file:/C:/Users/Edward/StudioProjects/BUCommunityApp-Android/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-cast/8.1.0/res/values/cast_strings.xml -->
     <eat-comment/>
     <string name="cast_notification_connected_message">Connected to <ns1:g id="name">%1$s</ns1:g></string>
@@ -325,7 +328,6 @@
     <string name="find_building">Search by acronym</string>
     <string name="go_to_CRC">Go to Charles River Campus</string>
     <string name="go_to_MED">Go to Medical Campus</string>
-    <string name="hello_world">Hello world!</string>
     <string name="medical">Medical Campus</string>
     <!-- From: file:/C:/Users/Edward/StudioProjects/BUCommunityApp-Android/app/build/intermediates/exploded-aar/com.android.support/mediarouter-v7/22.2.0/res/values/values.xml -->
     <eat-comment/>
@@ -341,7 +343,7 @@
     <string name="mr_user_route_category_name">Devices</string>
     <!-- From: file:/C:/Users/Edward/StudioProjects/BUCommunityApp-Android/app/src/main/res/values/strings.xml -->
     <eat-comment/>
-    <string name="search_full_name">Search within building name</string>
+    <string name="not_found">Building not found.</string>
     <!-- From: file:/C:/Users/Edward/StudioProjects/BUCommunityApp-Android/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/res/values/values.xml -->
     <eat-comment/>
     <string name="status_bar_notification_info_overflow">999+</string>
@@ -351,8 +353,8 @@
     <string name="store_picture_title">Save image</string>
     <!-- From: file:/C:/Users/Edward/StudioProjects/BUCommunityApp-Android/app/src/main/res/values/strings.xml -->
     <eat-comment/>
-    <string name="title_activity_indoor_map">IndoorMap</string>
-    <string name="toggleNames">Toggle Building Names</string>
+    <string name="tap_get_name">Tap a building to find its name!</string>
+    <string name="title_activity_indoor_map" translatable="false">IndoorMap</string>
     <!-- From: file:/C:/Users/Edward/StudioProjects/BUCommunityApp-Android/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-wallet/8.1.0/res/values/wallet_strings.xml -->
     <eat-comment/>
     <string name="wallet_buy_button_place_holder">Buy with Google</string>

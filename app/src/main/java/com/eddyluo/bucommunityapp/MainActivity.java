@@ -1,10 +1,5 @@
 package com.eddyluo.bucommunityapp;
 
-/*
- * I'd like for the code to be more organized.
- *
-*/
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +25,10 @@ public class MainActivity extends AppCompatActivity {
 	
 	private static final LatLng GSU = new LatLng(42.351028, -71.109000);
 	private static final LatLng MED = new LatLng(42.336238, -71.072367);
-	final int startCoordIterator = 3; // change based on the index of the first coordinate of the building
 	GoogleMap BUmap; // class variable used for the map
     LocationManager locationManager;
 	SearchView searchView;
-	CharSequence tExplanation = "Tap a building to find its name!";
+	String tExplanation;
     ArrayList<Building> BUBuildings = new ArrayList<>();
 	int explanationDuration = Toast.LENGTH_LONG;
 	@Override
@@ -48,12 +42,15 @@ public class MainActivity extends AppCompatActivity {
         }
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		ArrayList<LatLng> vertices = new ArrayList<>(); // initializes a list of vertices
+
+        // Reading list of buildings
 		InputStream inputStream = getResources().openRawResource(R.raw.buildinglist);
 		CSVFile csvFile = new CSVFile(inputStream);
 		List<String[]> buildingList = csvFile.read();
 		String buildingCode;
 		String officialName;
 		String buildingType;
+        final int startCoordIterator = 3; // change based on the index of the first coordinate of the building
 		for (String[] bOptions : buildingList) { // this class places buildings into the arraylist
 			buildingCode = bOptions[0]; // initializes building code
 			officialName = bOptions[1]; // initializes full name
@@ -72,11 +69,13 @@ public class MainActivity extends AppCompatActivity {
 		for (Building buildingToAdd: BUBuildings) {
 			buildingToAdd.addToMap(BUmap);
 		}
-		
+
+        // Pop up explanation of the app
+
 		Context appStarted = getApplicationContext();
+        tExplanation = getResources().getString(R.string.tap_get_name);
 		Toast introToast = Toast.makeText(appStarted, tExplanation, explanationDuration);
 		introToast.show();
-
 		
 		BUmap.setOnMapClickListener(new OnMapClickListener() {
             @Override
@@ -137,13 +136,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void selectBuilding(Building bLoc) {
         // Plan: make this show something interesting about the building
+        /*
         if (bLoc.getColor() == Color.BLUE) {
 
         }
+        */
         BUmap.animateCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate())); // move camera to building
         bLoc.setColor(Color.BLUE);
         Context polygonpressed = getApplicationContext();
-        String polygonwriting = bLoc.getFullName() + " (" + bLoc.getName() + ") selected.";
+        String polygonwriting = bLoc.getFullName() + " (" + bLoc.getName() + ")" + getResources().getString(R.string.building_chosen);
         Toast tDispName = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
         tDispName.show();
     }
@@ -154,17 +155,19 @@ public class MainActivity extends AppCompatActivity {
         boolean buildingFound = false;
         int iter = 0;
 
-        while (!buildingFound && BUBuildings.size() > iter) {
+        while (BUBuildings.size() > iter) {
             Building toCheck = BUBuildings.get(iter);
             if (query.equalsIgnoreCase(toCheck.getName())) {
                 buildingFound = true;
                 selectBuilding(toCheck);
+            } else {
+                toCheck.setColor(toCheck.originalColor);
             }
             iter++;
         }
         if (!buildingFound) {
             Context bNotFound = getApplicationContext();
-            String notFoundMessage = "Building not found.";
+            String notFoundMessage = getResources().getString(R.string.not_found);
             Toast tDispName = Toast.makeText (bNotFound, notFoundMessage, Toast.LENGTH_SHORT);
             tDispName.show();
         }
