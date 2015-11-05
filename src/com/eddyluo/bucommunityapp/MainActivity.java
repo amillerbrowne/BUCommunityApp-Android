@@ -77,13 +77,14 @@ public class MainActivity extends ActionBarActivity {
 		BUmap.setOnMapClickListener(new OnMapClickListener() {
 			@Override
 			public void onMapClick(LatLng tap) {
-				// TODO Auto-generated method stub
 				for (Building bLoc: BUBuildings) {
 					if (bLoc.isPointInPolygon(tap)) {
 						// The following is mostly placeholder until I make the new activity for indoor maps.
+                        /*
                         if (bLoc.getColor() == Color.BLUE) {
                         	
                         }
+                        */
 						BUmap.moveCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate())); 
 						bLoc.setColor(Color.BLUE);
 						Context polygonpressed = getApplicationContext();
