@@ -3,15 +3,13 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 23
     buildToolsVersion "21.1.2"
-
     defaultConfig {
         applicationId "com.eddyluo.bucommunityapp"
         minSdkVersion 11
         targetSdkVersion 23
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.11"
     }
-
     buildTypes {
         release {
             minifyEnabled true
@@ -30,4 +28,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-ads:8.1.0'
     compile 'com.google.android.gms:play-services-identity:8.1.0'
     compile 'com.google.android.gms:play-services-gcm:8.1.0'
+    compile 'com.readystatesoftware.sqliteasset:sqliteassethelper:+'
 }

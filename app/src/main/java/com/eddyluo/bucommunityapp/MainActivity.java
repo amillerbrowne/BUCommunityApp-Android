@@ -11,6 +11,8 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
 import android.app.SearchManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.content.Context;
 import android.graphics.Color;
@@ -42,30 +44,53 @@ public class MainActivity extends AppCompatActivity {
         }
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		ArrayList<LatLng> vertices = new ArrayList<>(); // initializes a list of vertices
+        String buildingCode;
+        String officialName;
+        String buildingType;
 
         // Reading list of buildings
+
+        MyDatabase buildingData = new MyDatabase(this);
+        Cursor readNames = buildingData.getBuildingNames();
+        Cursor vertexData;
+
+        while (readNames.moveToNext()) {
+            vertexData = buildingData.getBuildingVertices(readNames.getInt(0));
+            buildingCode = readNames.getString(1);
+            officialName = readNames.getString(2);
+            buildingType = readNames.getString(3);
+            while (vertexData.moveToNext()) {
+                double latitude = vertexData.getDouble(1);
+                double longitude = vertexData.getDouble(2);
+                vertices.add(new LatLng(latitude, longitude));
+            }
+            BUBuildings.add(new Building(vertices, buildingCode, officialName, buildingType)); // add the building
+            vertices.clear();
+        }
+        buildingData.close(); // close file
+
+        /*
 		InputStream inputStream = getResources().openRawResource(R.raw.buildinglist);
 		CSVFile csvFile = new CSVFile(inputStream);
 		List<String[]> buildingList = csvFile.read();
-		String buildingCode;
-		String officialName;
-		String buildingType;
+
         final int startCoordIterator = 3; // change based on the index of the first coordinate of the building
 		for (String[] bOptions : buildingList) { // this class places buildings into the arraylist
-			buildingCode = bOptions[0]; // initializes building code
-			officialName = bOptions[1]; // initializes full name
-			buildingType = bOptions[2]; // initializes color of building
-			for (int ii = startCoordIterator; ii < bOptions.length; ii++) {
-				if ((bOptions[ii]).length() != 0) {
-					String[] latAndLong = bOptions[ii].split(",");
-					double latitude = Double.parseDouble(latAndLong[0]);
-					double longitude = Double.parseDouble(latAndLong[1]);
-					vertices.add(new LatLng(latitude, longitude)); // adds the vertex to the thing
-				}
-			}
-			BUBuildings.add(new Building(vertices, buildingCode, officialName, buildingType)); // finally adds the building
-			vertices.clear();
-		}
+            buildingCode = bOptions[0]; // initializes building code
+            officialName = bOptions[1]; // initializes full name
+            buildingType = bOptions[2]; // initializes color of building
+            for (int ii = startCoordIterator; ii < bOptions.length; ii++) {
+                if ((bOptions[ii]).length() != 0) {
+                    String[] latAndLong = bOptions[ii].split(",");
+                    double latitude = Double.parseDouble(latAndLong[0]);
+                    double longitude = Double.parseDouble(latAndLong[1]);
+                    vertices.add(new LatLng(latitude, longitude)); // adds the vertex to the thing
+                }
+            }
+            BUBuildings.add(new Building(vertices, buildingCode, officialName, buildingType)); // finally adds the building
+            vertices.clear();
+        }
+        */
 		for (Building buildingToAdd: BUBuildings) {
 			buildingToAdd.addToMap(BUmap);
 		}

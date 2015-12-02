@@ -225,10 +225,10 @@ category#android.intent.category.LAUNCHER
 ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:28:17-77
 	android:name
 		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:28:27-74
-meta-data#com.google.android.maps.v2.API_KEY
+meta-data#com.google.android.geo.API_KEY
 ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:32:9-34:71
 	android:name
-		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:33:13-62
+		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:33:13-58
 	android:value
 		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:34:13-68
 meta-data#com.google.android.gms.version
