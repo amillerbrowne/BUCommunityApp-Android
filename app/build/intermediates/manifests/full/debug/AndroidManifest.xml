@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.eddyluo.bucommunityapp"
-    android:versionCode="2"
-    android:versionName="1.1" >
+    android:versionCode="3"
+    android:versionName="1.11" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -44,8 +44,8 @@
         </activity>
 
         <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyDU64mvEWTdp4nGH0A-m8ORg7CZuBhbgt8" />
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCLQwUbNiNr6FMa5wzslQIMxr6YSH-BQhY" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

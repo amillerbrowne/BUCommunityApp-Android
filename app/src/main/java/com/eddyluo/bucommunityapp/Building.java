@@ -23,22 +23,6 @@ public class Building implements Parcelable {
 	private PolygonOptions poBuilding; // Polygon Data (NOT SENT IN PARCEL)
 	private Polygon buildingOnMap;    // Building on the map (NOT SENT IN PARCEL)
 	
-	public Building(LatLng[] initialCoords, String initialName) { // accepts array
-		// Adds coordinates to an Array List
-		coords = new ArrayList<LatLng>(Arrays.asList(initialCoords));
-		name = initialName;
-		poBuilding = makePolygon(coords);
-        originalColor = Color.rgb(204,0,0);
-	}
-	
-	public Building(ArrayList<LatLng> initialCoords, String initialName) { // accepts arraylist
-		// Adds coordinates to an Array List
-		coords = initialCoords;
-		name = initialName;
-		poBuilding = makePolygon(coords);
-        originalColor = Color.rgb(204, 0, 0);
-	}
-	
 	public Building(ArrayList<LatLng> initialCoords, String initialName, String wholeName, String buildingType) { // accepts arraylist
 		// Adds coordinates to an Array List
 		coords = initialCoords;
@@ -79,16 +63,12 @@ public class Building implements Parcelable {
 
 	public LatLng getCenterCoordinate() {
 		LatLng centerCoordinate;
-		double minCoordX;
-		double minCoordY;
-		double maxCoordX;
-		double maxCoordY;
 		
 		List<LatLng> vertices = poBuilding.getPoints();
-		minCoordX = vertices.get(0).latitude;
-		maxCoordX = vertices.get(0).latitude;
-		minCoordY = vertices.get(0).longitude;
-		maxCoordY = vertices.get(0).longitude;
+		double minCoordX = vertices.get(0).latitude;
+		double maxCoordX = vertices.get(0).latitude;
+		double minCoordY = vertices.get(0).longitude;
+		double maxCoordY = vertices.get(0).longitude;
 		for(int i=0; i < (vertices.size()); i++) {
 			if (vertices.get(i).latitude < minCoordX) {
 				minCoordX = vertices.get(i).latitude;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">BU Community App</string>
+    <string name="app_name">Boston University Map</string>
     <string name="action_settings">Settings</string>
     <string name="charles_river">Charles River</string>
     <string name="medical">Medical Campus</string>
