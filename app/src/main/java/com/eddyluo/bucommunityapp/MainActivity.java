@@ -8,6 +8,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import android.app.SearchManager;
@@ -25,8 +26,9 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 	
-	private static final LatLng GSU = new LatLng(42.351028, -71.109000);
-	private static final LatLng MED = new LatLng(42.336238, -71.072367);
+	private static final LatLng GSU = new LatLng(42.351028, -71.109000); // George Sherman Union
+	private static final LatLng MED = new LatLng(42.336238, -71.072367); // Medical Campus
+    CameraPosition initialPosition;
 	GoogleMap BUmap; // class variable used for the map
     LocationManager locationManager;
 	SearchView searchView;
@@ -35,11 +37,17 @@ public class MainActivity extends AppCompatActivity {
 	int explanationDuration = Toast.LENGTH_LONG;
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
+        initialPosition = new CameraPosition.Builder()
+                .target(GSU)
+                .bearing(9.5f)
+                .zoom(16.0f)
+                .build();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BUmap = ((MapFragment)getFragmentManager().findFragmentById(R.id.MapFragment)).getMap();
         if (BUmap != null) {
-            BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
+            BUmap.setBuildingsEnabled(false); // disable 3D buildings
+            BUmap.moveCamera(CameraUpdateFactory.newCameraPosition(initialPosition));
             BUmap.setMyLocationEnabled(true); // location shown on map. plan to show which building you're in
         }
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -69,28 +77,7 @@ public class MainActivity extends AppCompatActivity {
         }
         buildingData.close(); // close file
 
-        /*
-		InputStream inputStream = getResources().openRawResource(R.raw.buildinglist);
-		CSVFile csvFile = new CSVFile(inputStream);
-		List<String[]> buildingList = csvFile.read();
 
-        final int startCoordIterator = 3; // change based on the index of the first coordinate of the building
-		for (String[] bOptions : buildingList) { // this class places buildings into the arraylist
-            buildingCode = bOptions[0]; // initializes building code
-            officialName = bOptions[1]; // initializes full name
-            buildingType = bOptions[2]; // initializes color of building
-            for (int ii = startCoordIterator; ii < bOptions.length; ii++) {
-                if ((bOptions[ii]).length() != 0) {
-                    String[] latAndLong = bOptions[ii].split(",");
-                    double latitude = Double.parseDouble(latAndLong[0]);
-                    double longitude = Double.parseDouble(latAndLong[1]);
-                    vertices.add(new LatLng(latitude, longitude)); // adds the vertex to the thing
-                }
-            }
-            BUBuildings.add(new Building(vertices, buildingCode, officialName, buildingType)); // finally adds the building
-            vertices.clear();
-        }
-        */
 		for (Building buildingToAdd: BUBuildings) {
 			buildingToAdd.addToMap(BUmap);
 		}
@@ -149,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
 		int id = item.getItemId();
 		if (id == R.id.switch_to_CRC) {
-			BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
+			BUmap.moveCamera(CameraUpdateFactory.newCameraPosition(initialPosition));
             return true;
         }
         if (id == R.id.switch_to_MED) {
