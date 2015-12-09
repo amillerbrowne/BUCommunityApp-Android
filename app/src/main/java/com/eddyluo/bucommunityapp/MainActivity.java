@@ -1,18 +1,16 @@
 package com.eddyluo.bucommunityapp;
 
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import android.app.SearchManager;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.content.Context;
 import android.graphics.Color;
@@ -24,26 +22,33 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-	
-	private static final LatLng GSU = new LatLng(42.351028, -71.109000);
-	private static final LatLng MED = new LatLng(42.336238, -71.072367);
-	GoogleMap BUmap; // class variable used for the map
+
+    private static final LatLng GSU = new LatLng(42.351028, -71.109000); // George Sherman Union
+    private static final LatLng MED = new LatLng(42.336238, -71.072367); // Medical Campus
+    CameraPosition initialPosition;
+    GoogleMap BUmap; // class variable used for the map
     LocationManager locationManager;
-	SearchView searchView;
-	String tExplanation;
+    SearchView searchView;
+    String tExplanation;
     ArrayList<Building> BUBuildings = new ArrayList<>();
-	int explanationDuration = Toast.LENGTH_LONG;
-	@Override
+    int explanationDuration = Toast.LENGTH_LONG;
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
+        initialPosition = new CameraPosition.Builder()
+                .target(GSU)
+                .bearing(9.5f)
+                .zoom(16.0f)
+                .build();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BUmap = ((MapFragment)getFragmentManager().findFragmentById(R.id.MapFragment)).getMap();
         if (BUmap != null) {
-            BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
+            BUmap.setBuildingsEnabled(false); // disable 3D buildings
+            BUmap.moveCamera(CameraUpdateFactory.newCameraPosition(initialPosition));
             BUmap.setMyLocationEnabled(true); // location shown on map. plan to show which building you're in
         }
-		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		ArrayList<LatLng> vertices = new ArrayList<>(); // initializes a list of vertices
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        ArrayList<LatLng> vertices = new ArrayList<>(); // initializes a list of vertices
         String buildingCode;
         String officialName;
         String buildingType;
@@ -69,40 +74,19 @@ public class MainActivity extends AppCompatActivity {
         }
         buildingData.close(); // close file
 
-        /*
-		InputStream inputStream = getResources().openRawResource(R.raw.buildinglist);
-		CSVFile csvFile = new CSVFile(inputStream);
-		List<String[]> buildingList = csvFile.read();
 
-        final int startCoordIterator = 3; // change based on the index of the first coordinate of the building
-		for (String[] bOptions : buildingList) { // this class places buildings into the arraylist
-            buildingCode = bOptions[0]; // initializes building code
-            officialName = bOptions[1]; // initializes full name
-            buildingType = bOptions[2]; // initializes color of building
-            for (int ii = startCoordIterator; ii < bOptions.length; ii++) {
-                if ((bOptions[ii]).length() != 0) {
-                    String[] latAndLong = bOptions[ii].split(",");
-                    double latitude = Double.parseDouble(latAndLong[0]);
-                    double longitude = Double.parseDouble(latAndLong[1]);
-                    vertices.add(new LatLng(latitude, longitude)); // adds the vertex to the thing
-                }
-            }
-            BUBuildings.add(new Building(vertices, buildingCode, officialName, buildingType)); // finally adds the building
-            vertices.clear();
+        for (Building buildingToAdd: BUBuildings) {
+            buildingToAdd.addToMap(BUmap);
         }
-        */
-		for (Building buildingToAdd: BUBuildings) {
-			buildingToAdd.addToMap(BUmap);
-		}
 
         // Pop up explanation of the app
 
-		Context appStarted = getApplicationContext();
+        Context appStarted = getApplicationContext();
         tExplanation = getResources().getString(R.string.tap_get_name);
-		Toast introToast = Toast.makeText(appStarted, tExplanation, explanationDuration);
-		introToast.show();
-		
-		BUmap.setOnMapClickListener(new OnMapClickListener() {
+        Toast introToast = Toast.makeText(appStarted, tExplanation, explanationDuration);
+        introToast.show();
+
+        BUmap.setOnMapClickListener(new OnMapClickListener() {
             @Override
             public void onMapClick(LatLng tap) {
                 for (Building bLoc : BUBuildings) {
@@ -114,19 +98,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-	}
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
-		// Inflate the menu; this adds items to the action bar if it is present
-		getMenuInflater().inflate(R.menu.main, menu);
-		// Initiates the search manager's options
+        // Inflate the menu; this adds items to the action bar if it is present
+        getMenuInflater().inflate(R.menu.main, menu);
+        // Initiates the search manager's options
         searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         searchView.setQueryHint(getResources().getString(R.string.find_building));
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-		searchView.setIconifiedByDefault(false);
+        searchView.setIconifiedByDefault(false);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -139,25 +123,25 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-		return true;
-	}
+        return true;
+    }
 
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
 
-		int id = item.getItemId();
-		if (id == R.id.switch_to_CRC) {
-			BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(GSU, 16.0f));
+        int id = item.getItemId();
+        if (id == R.id.switch_to_CRC) {
+            BUmap.moveCamera(CameraUpdateFactory.newCameraPosition(initialPosition));
             return true;
         }
         if (id == R.id.switch_to_MED) {
-			BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(MED, 16.0f));
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+            BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(MED, 16.0f));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     public void selectBuilding(Building bLoc) {
         // Plan: make this show something interesting about the building
@@ -174,8 +158,8 @@ public class MainActivity extends AppCompatActivity {
         tDispName.show();
     }
 
-	@Override
-	public boolean onSearchRequested() {
+    @Override
+    public boolean onSearchRequested() {
         String query = searchView.getQuery().toString();
         boolean buildingFound = false;
         int iter = 0;
@@ -196,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
             Toast tDispName = Toast.makeText (bNotFound, notFoundMessage, Toast.LENGTH_SHORT);
             tDispName.show();
         }
-		return super.onSearchRequested();
-	}
+        return super.onSearchRequested();
+    }
 
 }
