@@ -1,5 +1,12 @@
 package com.eddyluo.bucommunityapp;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -9,17 +16,25 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
+import android.app.ProgressDialog;
 import android.app.SearchManager;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SearchView;
 import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -181,6 +196,80 @@ public class MainActivity extends AppCompatActivity {
             tDispName.show();
         }
         return super.onSearchRequested();
+    }
+    class MyAsyncTask extends AsyncTask<String, String, Void> {
+        private ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+        InputStream inputStream = null;
+        String result = "";
+
+        protected void onPreExecute() {
+            progressDialog.setMessage("Downloading BU Shuttle data...");
+            progressDialog.show();
+            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                public void onCancel(DialogInterface arg0) {
+                    MyAsyncTask.this.cancel(true);
+                }
+            });
+        }
+        @Override
+        protected Void doInBackground(String... params) {
+
+            String url_select = "http://www.bu.edu/bumobile/rpc/bus/livebus.json.php";
+
+            ArrayList<LatLng> param = new ArrayList<LatLng>();
+
+            try {
+                // Set up HTTP post
+
+                // HttpClient is more then less deprecated. Need to change to URLConnection
+                URL url = new URL(url_select);
+                HttpURLConnection connectTo = (HttpURLConnection) url.openConnection();
+                connectTo.setRequestProperty("User-Agent", "");
+                connectTo.setRequestMethod("POST");
+                connectTo.setDoInput(true);
+                connectTo.connect();
+
+                // Read content & Log
+                inputStream = connectTo.getInputStream();
+            } catch (IOException e4) {
+                Log.e("IOException", e4.toString());
+                e4.printStackTrace();
+            }
+            // Convert response to string using String Builder
+            try {
+                BufferedReader bReader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"), 8);
+                StringBuilder sBuilder = new StringBuilder();
+
+                String line = null;
+                while ((line = bReader.readLine()) != null) {
+                    sBuilder.append(line + "\n");
+                }
+
+                inputStream.close();
+                result = sBuilder.toString();
+
+            } catch (Exception e) {
+                Log.e("StringBuilding & BufferedReader", "Error converting result " + e.toString());
+            }
+            return null;
+        } // protected Void doInBackground(String... params)
+        protected void onPostExecute(Void v) {
+            //parse JSON data
+            try {
+                JSONArray jArray = new JSONArray(result);
+                for(int i=0; i < jArray.length(); i++) {
+
+                    JSONObject jObject = jArray.getJSONObject(i);
+
+                    String routeType = jObject.getString("service");
+                    String allBuses = jObject.getString("ResultSet");
+
+                } // End Loop
+                this.progressDialog.dismiss();
+            } catch (JSONException e) {
+                Log.e("JSONException", "Error: " + e.toString());
+            } // catch (JSONException e)
+        } // protected void onPostExecute(Void v)
     }
 
 }

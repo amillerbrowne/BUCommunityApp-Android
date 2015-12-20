@@ -2357,8 +2357,7 @@ containing a value of this type.
         public static final int main=0x7f0d0000;
     }
     public static final class raw {
-        public static final int buildinglist=0x7f050000;
-        public static final int gtm_analytics=0x7f050001;
+        public static final int gtm_analytics=0x7f050000;
     }
     public static final class string {
         public static final int abc_action_bar_home_description=0x7f060000;
