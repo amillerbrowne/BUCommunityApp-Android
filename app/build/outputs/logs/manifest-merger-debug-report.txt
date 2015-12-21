@@ -1,6 +1,6 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:2:1-41:12
+ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:2:1-42:12
 	xmlns:android
 		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:2:11-69
 	package
@@ -73,7 +73,7 @@ ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\An
 	android:name
 		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:16:22-76
 application
-ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:18:5-39:19
+ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:18:5-40:19
 MERGED from [com.android.support:support-v4:23.1.1] C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.1.1\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.gms:play-services:8.3.0] C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\build\intermediates\exploded-aar\com.google.android.gms\play-services\8.3.0\AndroidManifest.xml:19:5-20
 MERGED from [com.google.android.gms:play-services-ads:8.3.0] C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-ads\8.3.0\AndroidManifest.xml:24:5-32:19
@@ -208,13 +208,13 @@ ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\An
 	android:name
 		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:28:27-74
 meta-data#com.google.android.geo.API_KEY
-ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:32:9-34:71
+ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:33:9-35:71
 	android:name
-		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:33:13-58
+		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:34:13-58
 	android:value
-		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:34:13-68
+		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:35:13-68
 meta-data#com.google.android.gms.version
-ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:35:9-37:69
+ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:36:9-38:69
 MERGED from [com.google.android.gms:play-services-basement:8.3.0] C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-basement\8.3.0\AndroidManifest.xml:21:9-23:69
 MERGED from [com.google.android.gms:play-services-basement:8.3.0] C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-basement\8.3.0\AndroidManifest.xml:21:9-23:69
 MERGED from [com.google.android.gms:play-services-basement:8.3.0] C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-basement\8.3.0\AndroidManifest.xml:21:9-23:69
@@ -251,9 +251,9 @@ MERGED from [com.google.android.gms:play-services-basement:8.3.0] C:\Users\Edwar
 MERGED from [com.google.android.gms:play-services-basement:8.3.0] C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-basement\8.3.0\AndroidManifest.xml:21:9-23:69
 MERGED from [com.google.android.gms:play-services-basement:8.3.0] C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-basement\8.3.0\AndroidManifest.xml:21:9-23:69
 	android:name
-		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:36:13-58
+		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:37:13-58
 	android:value
-		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:37:13-66
+		ADDED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml:38:13-66
 uses-sdk
 INJECTED from C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 MERGED from [com.android.support:support-v4:23.1.1] C:\Users\Edward\StudioProjects\BUCommunityApp-Android\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.1.1\AndroidManifest.xml:20:5-43

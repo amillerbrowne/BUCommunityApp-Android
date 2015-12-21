@@ -15,6 +15,7 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.app.ProgressDialog;
 import android.app.SearchManager;
@@ -113,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        new MyAsyncTask().execute();
     }
 
     @Override
@@ -159,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void selectBuilding(Building bLoc) {
-        // Plan: make this show something interesting about the building
+        // Plan: make this display which classes are currently in session
         /*
         if (bLoc.getColor() == Color.BLUE) {
 
@@ -197,11 +199,12 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onSearchRequested();
     }
-    class MyAsyncTask extends AsyncTask<String, String, Void> {
+    private class MyAsyncTask extends AsyncTask<String, String, Void> {
         private ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
         InputStream inputStream = null;
         String result = "";
 
+        @Override
         protected void onPreExecute() {
             progressDialog.setMessage("Downloading BU Shuttle data...");
             progressDialog.show();
@@ -249,26 +252,33 @@ public class MainActivity extends AppCompatActivity {
                 result = sBuilder.toString();
 
             } catch (Exception e) {
-                Log.e("StringBuilding & BufferedReader", "Error converting result " + e.toString());
+                Log.e("St.Build,BuffRead", "Error converting result " + e.toString());
             }
             return null;
         } // protected Void doInBackground(String... params)
+
+        @Override
         protected void onPostExecute(Void v) {
             //parse JSON data
             try {
-                JSONArray jArray = new JSONArray(result);
-                for(int i=0; i < jArray.length(); i++) {
+                JSONObject busData = new JSONObject(result);
 
-                    JSONObject jObject = jArray.getJSONObject(i);
-
-                    String routeType = jObject.getString("service");
-                    String allBuses = jObject.getString("ResultSet");
-
-                } // End Loop
+                if (busData.getString("title").equals("BU Bus Positions")) {
+                    JSONObject resultSet = busData.getJSONObject("ResultSet");
+                    JSONArray results = resultSet.getJSONArray("Result");
+                    for (int i = 0; i < results.length(); i++) {
+                        JSONObject bus = results.getJSONObject(i);
+                        double lat = bus.getDouble("lat");
+                        double lng = bus.getDouble("lng");
+                        LatLng busLocation = new LatLng(lat,lng);
+                        BUmap.addMarker(new MarkerOptions().position(busLocation));
+                    }
+                }
                 this.progressDialog.dismiss();
             } catch (JSONException e) {
                 Log.e("JSONException", "Error: " + e.toString());
             } // catch (JSONException e)
+
         } // protected void onPostExecute(Void v)
     }
 
