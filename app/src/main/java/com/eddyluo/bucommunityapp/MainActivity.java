@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,11 +14,10 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import android.app.ProgressDialog;
 import android.app.SearchManager;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.content.Context;
@@ -41,12 +39,14 @@ public class MainActivity extends AppCompatActivity {
 
     private static final LatLng GSU = new LatLng(42.351028, -71.109000); // George Sherman Union
     private static final LatLng MED = new LatLng(42.336238, -71.072367); // Medical Campus
+    private final static int INTERVAL = 1000*5; // 5 seconds
     CameraPosition initialPosition;
     GoogleMap BUmap; // class variable used for the map
     LocationManager locationManager;
     SearchView searchView;
     String tExplanation;
     ArrayList<Building> BUBuildings = new ArrayList<>();
+    ArrayList<Marker> allBuses = new ArrayList<>();
     int explanationDuration = Toast.LENGTH_LONG;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,31 +200,15 @@ public class MainActivity extends AppCompatActivity {
         return super.onSearchRequested();
     }
     private class MyAsyncTask extends AsyncTask<String, String, Void> {
-        private ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
         InputStream inputStream = null;
         String result = "";
 
-        @Override
-        protected void onPreExecute() {
-            progressDialog.setMessage("Downloading BU Shuttle data...");
-            progressDialog.show();
-            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                public void onCancel(DialogInterface arg0) {
-                    MyAsyncTask.this.cancel(true);
-                }
-            });
-        }
         @Override
         protected Void doInBackground(String... params) {
 
             String url_select = "http://www.bu.edu/bumobile/rpc/bus/livebus.json.php";
 
-            ArrayList<LatLng> param = new ArrayList<LatLng>();
-
             try {
-                // Set up HTTP post
-
-                // HttpClient is more then less deprecated. Need to change to URLConnection
                 URL url = new URL(url_select);
                 HttpURLConnection connectTo = (HttpURLConnection) url.openConnection();
                 connectTo.setRequestProperty("User-Agent", "");
@@ -270,11 +254,26 @@ public class MainActivity extends AppCompatActivity {
                         JSONObject bus = results.getJSONObject(i);
                         double lat = bus.getDouble("lat");
                         double lng = bus.getDouble("lng");
+                        int call_name = bus.getInt("call_name");
+                        String bus_type;
+                        switch (call_name/100) {
+                            case 20:
+                                bus_type = "Large BUS";
+                                break;
+                            case 21:
+                                bus_type = "Small BUS";
+                                break;
+                            default:
+                                bus_type = "BUS";
+                        }
                         LatLng busLocation = new LatLng(lat,lng);
-                        BUmap.addMarker(new MarkerOptions().position(busLocation));
+                        Marker busMark = BUmap.addMarker(new MarkerOptions()
+                                .position(busLocation)
+                                .title(bus_type));
+                        allBuses.add(busMark);
+
                     }
                 }
-                this.progressDialog.dismiss();
             } catch (JSONException e) {
                 Log.e("JSONException", "Error: " + e.toString());
             } // catch (JSONException e)
