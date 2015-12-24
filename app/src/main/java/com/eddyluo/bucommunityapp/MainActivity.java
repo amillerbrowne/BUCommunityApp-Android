@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,8 +24,11 @@ import android.database.Cursor;
 import android.location.LocationManager;
 import android.content.Context;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -114,7 +119,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        new MyAsyncTask().execute();
+        final Handler h = new Handler();
+        Timer timer = new Timer();
+        TimerTask doAsyncTask = new TimerTask() {
+            @Override
+            public void run() {
+                Runnable runnable = new Runnable() {
+                    MyAsyncTask findShuttles = new MyAsyncTask();
+                    public void run() {
+                        if (isNetworkAvailable()) findShuttles.execute();
+                    }
+                };
+                h.post(runnable);
+            }
+        };
+        timer.schedule(doAsyncTask, 0, INTERVAL);
     }
 
     @Override
@@ -199,6 +218,14 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onSearchRequested();
     }
+
+    private boolean isNetworkAvailable() { // Used to check for connection to shuttle data.
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     private class MyAsyncTask extends AsyncTask<String, String, Void> {
         InputStream inputStream = null;
         String result = "";
@@ -248,6 +275,10 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject busData = new JSONObject(result);
 
                 if (busData.getString("title").equals("BU Bus Positions")) {
+                    for (Marker mark: allBuses) {
+                        mark.remove(); // Remove marker
+                    }
+                    allBuses.clear();
                     JSONObject resultSet = busData.getJSONObject("ResultSet");
                     JSONArray results = resultSet.getJSONArray("Result");
                     for (int i = 0; i < results.length(); i++) {
