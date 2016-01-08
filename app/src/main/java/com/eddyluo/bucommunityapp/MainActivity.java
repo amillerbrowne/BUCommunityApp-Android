@@ -16,6 +16,7 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final LatLng GSU = new LatLng(42.351028, -71.109000); // George Sherman Union
     private static final LatLng MED = new LatLng(42.336238, -71.072367); // Medical Campus
+    private static LatLngBounds BUSBOUNDS = new LatLngBounds(new LatLng(42.29, -71.15), new LatLng(42.38, -71.04));
     private final static int INTERVAL = 1000*5; // 5 seconds
     CameraPosition initialPosition;
     GoogleMap BUmap; // class variable used for the map
@@ -298,11 +300,12 @@ public class MainActivity extends AppCompatActivity {
                                 bus_type = "BUS";
                         }
                         LatLng busLocation = new LatLng(lat,lng);
-                        Marker busMark = BUmap.addMarker(new MarkerOptions()
-                                .position(busLocation)
-                                .title(bus_type));
-                        allBuses.add(busMark);
-
+                        if (BUSBOUNDS.contains(busLocation)) {
+                            Marker busMark = BUmap.addMarker(new MarkerOptions()
+                                    .position(busLocation)
+                                    .title(bus_type));
+                            allBuses.add(busMark);
+                        }
                     }
                 }
             } catch (JSONException e) {
