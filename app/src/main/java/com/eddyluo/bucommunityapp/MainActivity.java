@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final LatLng GSU = new LatLng(42.351028, -71.109000); // George Sherman Union
     private static final LatLng MED = new LatLng(42.336238, -71.072367); // Medical Campus
-    private static LatLngBounds BUSBOUNDS = new LatLngBounds(new LatLng(42.29, -71.15), new LatLng(42.38, -71.04));
+    private static final LatLngBounds BUSBOUNDS = new LatLngBounds(new LatLng(42.29, -71.15), new LatLng(42.38, -71.04));
     private final static int INTERVAL = 1000*5; // 5 seconds
     CameraPosition initialPosition;
     GoogleMap BUmap; // class variable used for the map
@@ -270,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
             return null;
         } // protected Void doInBackground(String... params)
 
+
         @Override
         protected void onPostExecute(Void v) {
             //parse JSON data
@@ -284,28 +285,33 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject resultSet = busData.getJSONObject("ResultSet");
                     JSONArray results = resultSet.getJSONArray("Result");
                     for (int i = 0; i < results.length(); i++) {
-                        JSONObject bus = results.getJSONObject(i);
-                        double lat = bus.getDouble("lat");
-                        double lng = bus.getDouble("lng");
-                        int call_name = bus.getInt("call_name");
-                        String bus_type;
-                        switch (call_name/100) {
-                            case 20:
-                                bus_type = "Large BUS";
-                                break;
-                            case 21:
-                                bus_type = "Small BUS";
-                                break;
-                            default:
-                                bus_type = "BUS";
-                        }
-                        LatLng busLocation = new LatLng(lat,lng);
-                        if (BUSBOUNDS.contains(busLocation)) {
+                        try {
+                            JSONObject bus = results.getJSONObject(i);
+                            double lat = bus.getDouble("lat");
+                            double lng = bus.getDouble("lng");
+                            int call_name = bus.getInt("call_name");
+                            String bus_type;
+                            switch (call_name / 100) {
+                                case 20:
+                                    bus_type = "Large BUS";
+                                    break;
+                                case 21:
+                                    bus_type = "Small BUS";
+                                    break;
+                                default:
+                                    bus_type = "BUS";
+                            }
+                            LatLng busLocation = new LatLng(lat, lng);
+                            if (BUSBOUNDS.contains(busLocation)) {
                             Marker busMark = BUmap.addMarker(new MarkerOptions()
                                     .position(busLocation)
                                     .title(bus_type));
                             allBuses.add(busMark);
-                        }
+                            }
+                        } catch (JSONException e) {
+                            Log.e("JSONException", "Error: " + e.toString());
+                        } // catch (JSONException e)
+
                     }
                 }
             } catch (JSONException e) {
