@@ -58,9 +58,9 @@ public class MainActivity extends AppCompatActivity {
     String tExplanation;
     ArrayList<Building> BUBuildings = new ArrayList<>();
     HashMap<Integer, Marker> allBuses = new HashMap<Integer, Marker>();
-    Timer timer = new Timer();
+    Timer timer;
     final Handler h = new Handler();
-    TimerTask readBuildings;
+    TimerTask readShuttles;
     int explanationDuration = Toast.LENGTH_LONG;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,24 +128,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
-        readBuildings = new ReadBuildings();
-        timer.schedule(readBuildings, 0, INTERVAL);
+    @Override
+    protected void onStart() { // Called when activity starts or restarts
+        super.onStart();
+        timer = new Timer(); // Reinitialize timer
+        readShuttles = new ReadShuttles(); // Reinitialize timer task
+        timer.schedule(readShuttles, 0, INTERVAL);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         timer.cancel(); // cancel timerg
-        readBuildings.cancel(); // Cancel TimerTask
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        timer = new Timer(); // Reinitialize timer
-        readBuildings = new ReadBuildings(); // Reinitialize timer task
-        timer.schedule(readBuildings, 0, INTERVAL);
+        readShuttles.cancel(); // Cancel TimerTask
     }
 
     @Override
@@ -238,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    private class ReadBuildings extends TimerTask {
+    private class ReadShuttles extends TimerTask {
         @Override
         public void run() {
 
@@ -309,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
                         double lng = bus.getDouble("lng");
                         LatLng busLocation = new LatLng(lat,lng);
                         if (allBuses.containsKey(call_name)) {
-                            animateMarker(allBuses.get(call_name), busLocation, true);
+                            animateMarker(allBuses.get(call_name), busLocation, false);
                         } else {
                             String bus_type;
                             switch (call_name/100) {
