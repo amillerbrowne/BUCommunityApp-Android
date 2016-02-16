@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,6 +15,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -21,6 +23,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.app.SearchManager;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.location.LocationManager;
 import android.content.Context;
 import android.graphics.Color;
@@ -29,10 +32,13 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -51,7 +57,10 @@ public class MainActivity extends AppCompatActivity {
     SearchView searchView;
     String tExplanation;
     ArrayList<Building> BUBuildings = new ArrayList<>();
-    ArrayList<Marker> allBuses = new ArrayList<>();
+    HashMap<Integer, Marker> allBuses = new HashMap<Integer, Marker>();
+    Timer timer = new Timer();
+    final Handler h = new Handler();
+    TimerTask readBuildings;
     int explanationDuration = Toast.LENGTH_LONG;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,21 +128,24 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        final Handler h = new Handler();
-        Timer timer = new Timer();
-        TimerTask doAsyncTask = new TimerTask() {
-            @Override
-            public void run() {
-                Runnable runnable = new Runnable() {
-                    MyAsyncTask findShuttles = new MyAsyncTask();
-                    public void run() {
-                        if (isNetworkAvailable()) findShuttles.execute();
-                    }
-                };
-                h.post(runnable);
-            }
-        };
-        timer.schedule(doAsyncTask, 0, INTERVAL);
+
+        readBuildings = new ReadBuildings();
+        timer.schedule(readBuildings, 0, INTERVAL);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        timer.cancel(); // cancel timerg
+        readBuildings.cancel(); // Cancel TimerTask
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        timer = new Timer(); // Reinitialize timer
+        readBuildings = new ReadBuildings(); // Reinitialize timer task
+        timer.schedule(readBuildings, 0, INTERVAL);
     }
 
     @Override
@@ -226,6 +238,20 @@ public class MainActivity extends AppCompatActivity {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+    private class ReadBuildings extends TimerTask {
+        @Override
+        public void run() {
+
+            Runnable runnable = new Runnable() {
+                MyAsyncTask findShuttles = new MyAsyncTask();
+                public void run() {
+                    if (isNetworkAvailable()) findShuttles.execute();
+                }
+            };
+            h.post(runnable);
+        }
+    }
+
     private class MyAsyncTask extends AsyncTask<String, String, Void> {
         InputStream inputStream = null;
         String result = "";
@@ -275,34 +301,34 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject busData = new JSONObject(result);
 
                 if (busData.getString("title").equals("BU Bus Positions")) {
-                    for (Marker mark: allBuses) {
-                        mark.remove(); // Remove marker
-                    }
                     allBuses.clear();
                     JSONObject resultSet = busData.getJSONObject("ResultSet");
                     JSONArray results = resultSet.getJSONArray("Result");
                     for (int i = 0; i < results.length(); i++) {
                         JSONObject bus = results.getJSONObject(i);
+                        int call_name = bus.getInt("call_name");
                         double lat = bus.getDouble("lat");
                         double lng = bus.getDouble("lng");
-                        int call_name = bus.getInt("call_name");
-                        String bus_type;
-                        switch (call_name/100) {
-                            case 20:
-                                bus_type = "Large BUS";
-                                break;
-                            case 21:
-                                bus_type = "Small BUS";
-                                break;
-                            default:
-                                bus_type = "BUS";
-                        }
                         LatLng busLocation = new LatLng(lat,lng);
-                        Marker busMark = BUmap.addMarker(new MarkerOptions()
-                                .position(busLocation)
-                                .title(bus_type));
-                        allBuses.add(busMark);
-
+                        if (allBuses.containsKey(call_name)) {
+                            animateMarker(allBuses.get(call_name), busLocation, false);
+                        } else {
+                            String bus_type;
+                            switch (call_name/100) {
+                                case 20:
+                                    bus_type = "Large BUS";
+                                    break;
+                                case 21:
+                                    bus_type = "Small BUS";
+                                    break;
+                                default:
+                                    bus_type = "BUS";
+                            }
+                            Marker busMark = BUmap.addMarker(new MarkerOptions()
+                                    .position(busLocation)
+                                    .title(bus_type));
+                            allBuses.put(call_name, busMark);
+                        }
                     }
                 }
             } catch (JSONException e) {
@@ -310,6 +336,42 @@ public class MainActivity extends AppCompatActivity {
             } // catch (JSONException e)
 
         } // protected void onPostExecute(Void v)
+    }
+    public void animateMarker(final Marker marker, final LatLng toPosition,
+                              final boolean hideMarker) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        Projection proj = BUmap.getProjection();
+        Point startPoint = proj.toScreenLocation(marker.getPosition());
+        final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+        final long duration = 500;
+
+        final Interpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed
+                        / duration);
+                double lng = t * toPosition.longitude + (1 - t)
+                        * startLatLng.longitude;
+                double lat = t * toPosition.latitude + (1 - t)
+                        * startLatLng.latitude;
+                marker.setPosition(new LatLng(lat, lng));
+
+                if (t < 1.0) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                } else {
+                    if (hideMarker) {
+                        marker.setVisible(false);
+                    } else {
+                        marker.setVisible(true);
+                    }
+                }
+            }
+        });
     }
 
 }
