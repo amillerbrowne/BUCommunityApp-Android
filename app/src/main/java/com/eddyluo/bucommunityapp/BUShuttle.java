@@ -9,9 +9,9 @@ public class BUShuttle {
     private int id;
     private LatLng location;
 
-    public BUShuttle(int id) {
+    public BUShuttle(int id, LatLng location) {
         this.id = id;
-
+        this.location = location;
     }
 
     public int getId() {
