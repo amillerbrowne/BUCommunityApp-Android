@@ -299,9 +299,7 @@ public class MainActivity extends AppCompatActivity {
             //parse JSON data
             try {
                 JSONObject busData = new JSONObject(result);
-
                 if (busData.getString("title").equals("BU Bus Positions")) {
-                    allBuses.clear();
                     JSONObject resultSet = busData.getJSONObject("ResultSet");
                     JSONArray results = resultSet.getJSONArray("Result");
                     for (int i = 0; i < results.length(); i++) {
@@ -311,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
                         double lng = bus.getDouble("lng");
                         LatLng busLocation = new LatLng(lat,lng);
                         if (allBuses.containsKey(call_name)) {
-                            animateMarker(allBuses.get(call_name), busLocation, false);
+                            animateMarker(allBuses.get(call_name), busLocation, true);
                         } else {
                             String bus_type;
                             switch (call_name/100) {
