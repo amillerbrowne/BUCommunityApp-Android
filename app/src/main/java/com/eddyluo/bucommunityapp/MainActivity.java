@@ -300,30 +300,34 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject resultSet = busData.getJSONObject("ResultSet");
                     JSONArray results = resultSet.getJSONArray("Result");
                     for (int i = 0; i < results.length(); i++) {
-                        JSONObject bus = results.getJSONObject(i);
-                        int call_name = bus.getInt("call_name");
-                        double lat = bus.getDouble("lat");
-                        double lng = bus.getDouble("lng");
-                        LatLng busLocation = new LatLng(lat,lng);
-                        if (allBuses.containsKey(call_name)) {
-                            animateMarker(allBuses.get(call_name), busLocation, false);
-                        } else {
-                            String bus_type;
-                            switch (call_name/100) {
-                                case 20:
-                                    bus_type = "Large BUS";
-                                    break;
-                                case 21:
-                                    bus_type = "Small BUS";
-                                    break;
-                                default:
-                                    bus_type = "BUS";
+                        try { // loop over all of them so that one malformed JSON doesn't break it
+                            JSONObject bus = results.getJSONObject(i);
+                            int call_name = bus.getInt("call_name");
+                            double lat = bus.getDouble("lat");
+                            double lng = bus.getDouble("lng");
+                            LatLng busLocation = new LatLng(lat,lng);
+                            if (allBuses.containsKey(call_name)) {
+                                animateMarker(allBuses.get(call_name), busLocation, false);
+                            } else {
+                                String bus_type;
+                                switch (call_name/100) {
+                                    case 20:
+                                        bus_type = "Large BUS";
+                                        break;
+                                    case 21:
+                                        bus_type = "Small BUS";
+                                        break;
+                                    default:
+                                        bus_type = "BUS";
+                                }
+                                Marker busMark = BUmap.addMarker(new MarkerOptions()
+                                        .position(busLocation)
+                                        .title(bus_type));
+                                allBuses.put(call_name, busMark);
                             }
-                            Marker busMark = BUmap.addMarker(new MarkerOptions()
-                                    .position(busLocation)
-                                    .title(bus_type));
-                            allBuses.put(call_name, busMark);
-                        }
+                        } catch (JSONException e) {
+                            Log.e("JSONException", "Error: " + e.toString());
+                        } // catch (JSONException e)
                     }
                 }
             } catch (JSONException e) {
