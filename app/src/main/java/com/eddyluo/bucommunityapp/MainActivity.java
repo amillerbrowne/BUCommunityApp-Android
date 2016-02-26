@@ -305,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
                             int call_name = bus.getInt("call_name");
                             double lat = bus.getDouble("lat");
                             double lng = bus.getDouble("lng");
+                            float heading = (float) bus.getInt("heading");
                             LatLng busLocation = new LatLng(lat,lng);
                             if (allBuses.containsKey(call_name)) {
                                 animateMarker(allBuses.get(call_name), busLocation, false);
@@ -322,7 +323,9 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 Marker busMark = BUmap.addMarker(new MarkerOptions()
                                         .position(busLocation)
-                                        .title(bus_type));
+                                        .title(bus_type)
+                                        .rotation(heading)
+                                        .flat(true));
                                 allBuses.put(call_name, busMark);
                             }
                         } catch (JSONException e) {
