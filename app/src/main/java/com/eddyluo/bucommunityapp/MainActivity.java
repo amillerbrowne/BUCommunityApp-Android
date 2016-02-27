@@ -308,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
                             float heading = (float) bus.getInt("heading");
                             LatLng busLocation = new LatLng(lat,lng);
                             if (allBuses.containsKey(call_name)) {
-                                animateMarker(allBuses.get(call_name), busLocation, false);
+                                animateMarker(allBuses.get(call_name), busLocation, heading, false);
                             } else {
                                 String bus_type;
                                 switch (call_name/100) {
@@ -339,12 +339,13 @@ public class MainActivity extends AppCompatActivity {
 
         } // protected void onPostExecute(Void v)
     }
-    public void animateMarker(final Marker marker, final LatLng toPosition,
+    public void animateMarker(final Marker marker, final LatLng toPosition,  final float heading,
                               final boolean hideMarker) {
         final Handler handler = new Handler();
         final long start = SystemClock.uptimeMillis();
         Projection proj = BUmap.getProjection();
         Point startPoint = proj.toScreenLocation(marker.getPosition());
+        final float startAngle = heading;
         final LatLng startLatLng = proj.fromScreenLocation(startPoint);
         final long duration = 500;
 
@@ -360,8 +361,9 @@ public class MainActivity extends AppCompatActivity {
                         * startLatLng.longitude;
                 double lat = t * toPosition.latitude + (1 - t)
                         * startLatLng.latitude;
+                float angle = t * heading + (1-t)*startAngle;
                 marker.setPosition(new LatLng(lat, lng));
-
+                marker.setRotation(angle);
                 if (t < 1.0) {
                     // Post again 16ms later.
                     handler.postDelayed(this, 16);
