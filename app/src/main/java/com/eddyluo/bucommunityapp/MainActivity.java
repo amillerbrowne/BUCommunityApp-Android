@@ -21,7 +21,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import android.Manifest;
 import android.app.SearchManager;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.location.LocationManager;
@@ -30,11 +32,13 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Interpolator;
@@ -47,7 +51,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-
+    private static final String[] LOCATION_PERMS={
+            Manifest.permission.ACCESS_FINE_LOCATION
+    };
     private static final LatLng GSU = new LatLng(42.351028, -71.109000); // George Sherman Union
     private static final LatLng MED = new LatLng(42.336238, -71.072367); // Medical Campus
     private final static int INTERVAL = 1000*5; // 5 seconds
@@ -57,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     SearchView searchView;
     String tExplanation;
     ArrayList<Building> BUBuildings = new ArrayList<>();
-    HashMap<Integer, Marker> allBuses = new HashMap<Integer, Marker>();
+    SparseArray<Marker> allBuses = new SparseArray<>();
     Timer timer;
     final Handler h = new Handler();
     TimerTask readShuttles;
@@ -75,7 +81,13 @@ public class MainActivity extends AppCompatActivity {
         if (BUmap != null) {
             BUmap.setBuildingsEnabled(false); // disable 3D buildings
             BUmap.moveCamera(CameraUpdateFactory.newCameraPosition(initialPosition));
-            BUmap.setMyLocationEnabled(true); // location shown on map. plan to show which building you're in
+            if (canAccessLocation()) {
+                BUmap.setMyLocationEnabled(true); // location shown on map. plan to show which building you're in
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(LOCATION_PERMS, 103);
+                }
+            }
         }
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         ArrayList<LatLng> vertices = new ArrayList<>(); // initializes a list of vertices
@@ -203,6 +215,16 @@ public class MainActivity extends AppCompatActivity {
         tDispName.show();
     }
 
+    private boolean canAccessLocation() {
+        return(hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
+    }
+
+    private boolean hasPermission(String perm) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // if API above 23
+            return(PackageManager.PERMISSION_GRANTED==checkSelfPermission(perm));
+        } else return true;
+    }
+
     @Override
     public boolean onSearchRequested() {
         String query = searchView.getQuery().toString();
@@ -277,9 +299,10 @@ public class MainActivity extends AppCompatActivity {
                 BufferedReader bReader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"), 8);
                 StringBuilder sBuilder = new StringBuilder();
 
-                String line = null;
+                String line;
                 while ((line = bReader.readLine()) != null) {
-                    sBuilder.append(line + "\n");
+                    sBuilder.append(line);
+                    sBuilder.append("\n");
                 }
 
                 inputStream.close();
@@ -307,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
                             double lng = bus.getDouble("lng");
                             float heading = (float) bus.getInt("heading");
                             LatLng busLocation = new LatLng(lat,lng);
-                            if (allBuses.containsKey(call_name)) {
+                            if (allBuses.get(call_name) != null) {
                                 animateMarker(allBuses.get(call_name), busLocation, heading, false);
                             } else {
                                 String bus_type;
