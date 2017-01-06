@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,7 +21,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.Manifest;
-import android.app.SearchManager;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Point;
@@ -41,8 +39,13 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     CameraPosition initialPosition;
     GoogleMap BUmap; // class variable used for the map
     LocationManager locationManager;
-    SearchView searchView;
+    AutoCompleteTextView tvSearchQuery;
     String tExplanation;
     ArrayList<Building> BUBuildings = new ArrayList<>();
     SparseArray<Marker> allBuses = new SparseArray<>();
@@ -153,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        timer.cancel(); // cancel timerg
+        timer.cancel(); // cancel timer
         readShuttles.cancel(); // Cancel TimerTask
     }
 
@@ -163,21 +166,24 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present
         getMenuInflater().inflate(R.menu.main, menu);
         // Initiates the search manager's options
-        searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setQueryHint(getResources().getString(R.string.find_building));
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        ArrayList<String> allNames = new ArrayList<>();
+        for (Building b: BUBuildings) {
+            allNames.add(b.getFullName());
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, R.id.drop_item, allNames);
+        tvSearchQuery = (AutoCompleteTextView) menu.findItem(R.id.action_search).getActionView();
+        tvSearchQuery.setHint(getResources().getString(R.string.find_building));
+        tvSearchQuery.setAdapter(adapter);
+        tvSearchQuery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                onSearchRequested();
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                try {
+                    InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                } catch (Exception e) {
+                    // TODO: handle exception
+                }
+                buildingSearch(adapterView.getItemAtPosition(i).toString());
             }
         });
         return true;
@@ -225,15 +231,13 @@ public class MainActivity extends AppCompatActivity {
         } else return true;
     }
 
-    @Override
-    public boolean onSearchRequested() {
-        String query = searchView.getQuery().toString();
+    public boolean buildingSearch(String query) {
         boolean buildingFound = false;
         int iter = 0;
 
         while (BUBuildings.size() > iter) {
             Building toCheck = BUBuildings.get(iter);
-            if (query.equalsIgnoreCase(toCheck.getName())) {
+            if (query.equalsIgnoreCase(toCheck.getFullName())) {
                 buildingFound = true;
                 selectBuilding(toCheck);
             } else {
@@ -288,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
                 connectTo.setDoInput(true);
                 connectTo.connect();
 
-                // Read content & Log
+                // Read content and log
                 inputStream = connectTo.getInputStream();
             } catch (IOException e4) {
                 Log.e("IOException", e4.toString());
