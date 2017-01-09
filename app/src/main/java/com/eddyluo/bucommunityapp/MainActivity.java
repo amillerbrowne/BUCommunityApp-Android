@@ -14,6 +14,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -34,6 +35,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
@@ -53,13 +56,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity {
-    private static final String[] LOCATION_PERMS={
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+    private static final String[] LOCATION_PERMS = {
             Manifest.permission.ACCESS_FINE_LOCATION
     };
     private static final LatLng GSU = new LatLng(42.351028, -71.109000); // George Sherman Union
     private static final LatLng MED = new LatLng(42.336238, -71.072367); // Medical Campus
-    private final static int INTERVAL = 1000*5; // 5 seconds
+    private final static int INTERVAL = 1000 * 5; // 5 seconds
     CameraPosition initialPosition;
     GoogleMap BUmap; // class variable used for the map
     LocationManager locationManager;
@@ -71,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     final Handler h = new Handler();
     TimerTask readShuttles;
     int explanationDuration = Toast.LENGTH_LONG;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         initialPosition = new CameraPosition.Builder()
@@ -80,18 +84,153 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        BUmap = ((MapFragment)getFragmentManager().findFragmentById(R.id.MapFragment)).getMap();
+        if (BUmap == null) {
+            MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentById(R.id.MapFragment);
+            mapFrag.getMapAsync(this);
+        }
+
+        // Pop up explanation of the app
+
+        Context appStarted = getApplicationContext();
+        tExplanation = getResources().getString(R.string.tap_get_name);
+        Toast introToast = Toast.makeText(appStarted, tExplanation, explanationDuration);
+        introToast.show();
+    }
+
+    @Override
+    protected void onStart() { // Called when activity starts or restarts
+        super.onStart();
+        timer = new Timer(); // Reinitialize timer
+        readShuttles = new ReadShuttles(); // Reinitialize timer task
+        timer.schedule(readShuttles, 0, INTERVAL);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        timer.cancel(); // cancel timer
+        readShuttles.cancel(); // Cancel TimerTask
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        // Inflate the menu; this adds items to the action bar if it is present
+        getMenuInflater().inflate(R.menu.main, menu);
+        // Initiates the search manager's options
+        ArrayList<String> allNames = new ArrayList<>();
+        for (Building b : BUBuildings) {
+            allNames.add(b.getFullName());
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, R.id.drop_item, allNames);
+        tvSearchQuery = (AutoCompleteTextView) menu.findItem(R.id.action_search).getActionView();
+        tvSearchQuery.setHint(getResources().getString(R.string.find_building));
+        tvSearchQuery.setAdapter(adapter);
+        tvSearchQuery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                try {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                } catch (Exception e) {
+                    // TODO: handle exception
+                }
+                buildingSearch(adapterView.getItemAtPosition(i).toString());
+            }
+        });
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+
+        int id = item.getItemId();
+        if (id == R.id.switch_to_CRC) {
+            if (BUmap != null) {
+                BUmap.moveCamera(CameraUpdateFactory.newCameraPosition(initialPosition));
+            }
+            return true;
+        }
+        if (id == R.id.switch_to_MED) {
+            if (BUmap != null){
+                BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(MED, 16.0f));
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void selectBuilding(Building bLoc) {
+        // Plan: make this display which classes are currently in session
+        /*
+        if (bLoc.getColor() == Color.BLUE) {
+
+        }
+        */
         if (BUmap != null) {
-            BUmap.setBuildingsEnabled(false); // disable 3D buildings
-            BUmap.moveCamera(CameraUpdateFactory.newCameraPosition(initialPosition));
-            if (canAccessLocation()) {
-                BUmap.setMyLocationEnabled(true); // location shown on map. plan to show which building you're in
+            BUmap.animateCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate())); // move camera to building
+        }
+        bLoc.setColor(Color.BLUE);
+        Context polygonpressed = getApplicationContext();
+        String polygonwriting = bLoc.getFullName() + " (" + bLoc.getName() + ")" + getResources().getString(R.string.building_chosen);
+        Toast tDispName = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
+        tDispName.show();
+    }
+
+    public boolean buildingSearch(String query) {
+        boolean buildingFound = false;
+        int iter = 0;
+
+        while (BUBuildings.size() > iter) {
+            Building toCheck = BUBuildings.get(iter);
+            if (query.equalsIgnoreCase(toCheck.getFullName())) {
+                buildingFound = true;
+                selectBuilding(toCheck);
             } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requestPermissions(LOCATION_PERMS, 103);
+                toCheck.setColor(toCheck.originalColor);
+            }
+            iter++;
+        }
+        if (!buildingFound) {
+            Context bNotFound = getApplicationContext();
+            String notFoundMessage = getResources().getString(R.string.not_found);
+            Toast tDispName = Toast.makeText(bNotFound, notFoundMessage, Toast.LENGTH_SHORT);
+            tDispName.show();
+        }
+        return super.onSearchRequested();
+    }
+
+    private boolean isNetworkAvailable() { // Used to check for connection to shuttle data.
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        BUmap = googleMap;
+        setUpMap();
+    }
+
+    public void setUpMap() {
+        BUmap.setBuildingsEnabled(false); // disable 3D buildings
+        BUmap.moveCamera(CameraUpdateFactory.newCameraPosition(initialPosition));
+        BUmap.setOnMapClickListener(new OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng tap) {
+                for (Building bLoc : BUBuildings) {
+                    if (bLoc.isPointInPolygon(tap)) {
+                        selectBuilding(bLoc);
+                    } else {
+                        bLoc.setColor(bLoc.originalColor);
+                    }
                 }
             }
-        }
+        });
+
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         ArrayList<LatLng> vertices = new ArrayList<>(); // initializes a list of vertices
         String buildingCode;
@@ -120,145 +259,9 @@ public class MainActivity extends AppCompatActivity {
         buildingData.close(); // close file
 
 
-        for (Building buildingToAdd: BUBuildings) {
+        for (Building buildingToAdd : BUBuildings) {
             buildingToAdd.addToMap(BUmap);
         }
-
-        // Pop up explanation of the app
-
-        Context appStarted = getApplicationContext();
-        tExplanation = getResources().getString(R.string.tap_get_name);
-        Toast introToast = Toast.makeText(appStarted, tExplanation, explanationDuration);
-        introToast.show();
-
-        BUmap.setOnMapClickListener(new OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng tap) {
-                for (Building bLoc : BUBuildings) {
-                    if (bLoc.isPointInPolygon(tap)) {
-                        selectBuilding(bLoc);
-                    } else {
-                        bLoc.setColor(bLoc.originalColor);
-                    }
-                }
-            }
-        });
-    }
-
-    @Override
-    protected void onStart() { // Called when activity starts or restarts
-        super.onStart();
-        timer = new Timer(); // Reinitialize timer
-        readShuttles = new ReadShuttles(); // Reinitialize timer task
-        timer.schedule(readShuttles, 0, INTERVAL);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        timer.cancel(); // cancel timer
-        readShuttles.cancel(); // Cancel TimerTask
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        // Inflate the menu; this adds items to the action bar if it is present
-        getMenuInflater().inflate(R.menu.main, menu);
-        // Initiates the search manager's options
-        ArrayList<String> allNames = new ArrayList<>();
-        for (Building b: BUBuildings) {
-            allNames.add(b.getFullName());
-        }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, R.id.drop_item, allNames);
-        tvSearchQuery = (AutoCompleteTextView) menu.findItem(R.id.action_search).getActionView();
-        tvSearchQuery.setHint(getResources().getString(R.string.find_building));
-        tvSearchQuery.setAdapter(adapter);
-        tvSearchQuery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                try {
-                    InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                } catch (Exception e) {
-                    // TODO: handle exception
-                }
-                buildingSearch(adapterView.getItemAtPosition(i).toString());
-            }
-        });
-        return true;
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-
-        int id = item.getItemId();
-        if (id == R.id.switch_to_CRC) {
-            BUmap.moveCamera(CameraUpdateFactory.newCameraPosition(initialPosition));
-            return true;
-        }
-        if (id == R.id.switch_to_MED) {
-            BUmap.moveCamera(CameraUpdateFactory.newLatLngZoom(MED, 16.0f));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void selectBuilding(Building bLoc) {
-        // Plan: make this display which classes are currently in session
-        /*
-        if (bLoc.getColor() == Color.BLUE) {
-
-        }
-        */
-        BUmap.animateCamera(CameraUpdateFactory.newLatLng(bLoc.getCenterCoordinate())); // move camera to building
-        bLoc.setColor(Color.BLUE);
-        Context polygonpressed = getApplicationContext();
-        String polygonwriting = bLoc.getFullName() + " (" + bLoc.getName() + ")" + getResources().getString(R.string.building_chosen);
-        Toast tDispName = Toast.makeText(polygonpressed, polygonwriting, Toast.LENGTH_SHORT);
-        tDispName.show();
-    }
-
-    private boolean canAccessLocation() {
-        return(hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
-    }
-
-    private boolean hasPermission(String perm) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // if API above 23
-            return(PackageManager.PERMISSION_GRANTED==checkSelfPermission(perm));
-        } else return true;
-    }
-
-    public boolean buildingSearch(String query) {
-        boolean buildingFound = false;
-        int iter = 0;
-
-        while (BUBuildings.size() > iter) {
-            Building toCheck = BUBuildings.get(iter);
-            if (query.equalsIgnoreCase(toCheck.getFullName())) {
-                buildingFound = true;
-                selectBuilding(toCheck);
-            } else {
-                toCheck.setColor(toCheck.originalColor);
-            }
-            iter++;
-        }
-        if (!buildingFound) {
-            Context bNotFound = getApplicationContext();
-            String notFoundMessage = getResources().getString(R.string.not_found);
-            Toast tDispName = Toast.makeText (bNotFound, notFoundMessage, Toast.LENGTH_SHORT);
-            tDispName.show();
-        }
-        return super.onSearchRequested();
-    }
-
-    private boolean isNetworkAvailable() { // Used to check for connection to shuttle data.
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     private class ReadShuttles extends TimerTask {
@@ -348,12 +351,14 @@ public class MainActivity extends AppCompatActivity {
                                     default:
                                         bus_type = "BUS";
                                 }
-                                Marker busMark = BUmap.addMarker(new MarkerOptions()
-                                        .position(busLocation)
-                                        .title(bus_type)
-                                        .rotation(heading)
-                                        .flat(true));
-                                allBuses.put(call_name, busMark);
+                                if (BUmap != null) {
+                                    Marker busMark = BUmap.addMarker(new MarkerOptions()
+                                            .position(busLocation)
+                                            .title(bus_type)
+                                            .rotation(heading)
+                                            .flat(true));
+                                    allBuses.put(call_name, busMark);
+                                }
                             }
                         } catch (JSONException e) {
                             Log.e("JSONException", "Error: " + e.toString());
@@ -368,41 +373,44 @@ public class MainActivity extends AppCompatActivity {
     }
     public void animateMarker(final Marker marker, final LatLng toPosition,  final float heading,
                               final boolean hideMarker) {
-        final Handler handler = new Handler();
-        final long start = SystemClock.uptimeMillis();
-        Projection proj = BUmap.getProjection();
-        Point startPoint = proj.toScreenLocation(marker.getPosition());
-        final float startAngle = heading;
-        final LatLng startLatLng = proj.fromScreenLocation(startPoint);
-        final long duration = 500;
+        if (BUmap != null) {
+            final Handler handler = new Handler();
+            final long start = SystemClock.uptimeMillis();
+            Projection proj = BUmap.getProjection();
+            Point startPoint = proj.toScreenLocation(marker.getPosition());
+            final float startAngle = heading;
+            final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+            final long duration = 500;
 
-        final Interpolator interpolator = new LinearInterpolator();
+            final Interpolator interpolator = new LinearInterpolator();
 
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                long elapsed = SystemClock.uptimeMillis() - start;
-                float t = interpolator.getInterpolation((float) elapsed
-                        / duration);
-                double lng = t * toPosition.longitude + (1 - t)
-                        * startLatLng.longitude;
-                double lat = t * toPosition.latitude + (1 - t)
-                        * startLatLng.latitude;
-                float angle = t * heading + (1-t)*startAngle;
-                marker.setPosition(new LatLng(lat, lng));
-                marker.setRotation(angle);
-                if (t < 1.0) {
-                    // Post again 16ms later.
-                    handler.postDelayed(this, 16);
-                } else {
-                    if (hideMarker) {
-                        marker.setVisible(false);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = interpolator.getInterpolation((float) elapsed
+                            / duration);
+                    double lng = t * toPosition.longitude + (1 - t)
+                            * startLatLng.longitude;
+                    double lat = t * toPosition.latitude + (1 - t)
+                            * startLatLng.latitude;
+                    float angle = t * heading + (1-t)*startAngle;
+                    marker.setPosition(new LatLng(lat, lng));
+                    marker.setRotation(angle);
+                    if (t < 1.0) {
+                        // Post again 16ms later.
+                        handler.postDelayed(this, 16);
                     } else {
-                        marker.setVisible(true);
+                        if (hideMarker) {
+                            marker.setVisible(false);
+                        } else {
+                            marker.setVisible(true);
+                        }
                     }
                 }
-            }
-        });
+            });
+
+        }
     }
 
 }
