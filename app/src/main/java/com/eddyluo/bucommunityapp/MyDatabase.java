@@ -30,4 +30,8 @@ public class MyDatabase extends SQLiteAssetHelper {
     public Cursor getBuildingVertices(int id) {
         return getReadableDatabase().rawQuery("SELECT Vertex, x, y FROM Points WHERE _id = "+ id, null);
     }
+
+    public Cursor searchBuildingNames(String query) {
+        return getReadableDatabase().rawQuery("SELECT * FROM Buildings WHERE Name LIKE '"+ query +"%' OR Acronym LIKE '" + query + "%' COLLATE NOCASE", null);
+    }
 }

@@ -38,6 +38,8 @@ import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
@@ -49,7 +51,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.FilterQueryProvider;
 import android.widget.SearchView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -68,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     LocationManager locationManager;
     AutoCompleteTextView tvSearchQuery;
     String tExplanation;
+    MyDatabase buildingData  = new MyDatabase(this);
     ArrayList<Building> BUBuildings = new ArrayList<>();
     SparseArray<Marker> allBuses = new SparseArray<>();
     Timer timer;
@@ -121,10 +126,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ArrayList<String> allNames = new ArrayList<>();
         for (Building b : BUBuildings) {
             allNames.add(b.getFullName());
+            allNames.add(b.getName());
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, R.id.drop_item, allNames);
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.dropdown_item, null, new String[] {"Name","Acronym"}, null, 0);
+
         tvSearchQuery = (AutoCompleteTextView) menu.findItem(R.id.action_search).getActionView();
         tvSearchQuery.setHint(getResources().getString(R.string.find_building));
+        tvSearchQuery.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
         tvSearchQuery.setAdapter(adapter);
         tvSearchQuery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -139,6 +163,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         return true;
+    }
+    public boolean buildingSearch(String query) {
+        Cursor finder = buildingData.searchBuildingNames(query);
+        boolean buildingFound = false;
+        int iter = 0;
+
+        for (finder.moveToFirst(); !finder.isAfterLast(); finder.moveToNext()) {
+            // do what you need with the cursor here
+        }
+
+        while (BUBuildings.size() > iter) {
+            Building toCheck = BUBuildings.get(iter);
+            if (query.equalsIgnoreCase(toCheck.getFullName())) {
+                buildingFound = true;
+                selectBuilding(toCheck);
+            } else {
+                toCheck.setColor(toCheck.originalColor);
+            }
+            iter++;
+        }
+        if (!buildingFound) {
+            Context bNotFound = getApplicationContext();
+            String notFoundMessage = getResources().getString(R.string.not_found);
+            Toast tDispName = Toast.makeText(bNotFound, notFoundMessage, Toast.LENGTH_SHORT);
+            tDispName.show();
+        }
+        return super.onSearchRequested();
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -179,29 +230,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         tDispName.show();
     }
 
-    public boolean buildingSearch(String query) {
-        boolean buildingFound = false;
-        int iter = 0;
-
-        while (BUBuildings.size() > iter) {
-            Building toCheck = BUBuildings.get(iter);
-            if (query.equalsIgnoreCase(toCheck.getFullName())) {
-                buildingFound = true;
-                selectBuilding(toCheck);
-            } else {
-                toCheck.setColor(toCheck.originalColor);
-            }
-            iter++;
-        }
-        if (!buildingFound) {
-            Context bNotFound = getApplicationContext();
-            String notFoundMessage = getResources().getString(R.string.not_found);
-            Toast tDispName = Toast.makeText(bNotFound, notFoundMessage, Toast.LENGTH_SHORT);
-            tDispName.show();
-        }
-        return super.onSearchRequested();
-    }
-
     private boolean isNetworkAvailable() { // Used to check for connection to shuttle data.
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -238,8 +266,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         String buildingType;
 
         // Reading list of buildings
-
-        MyDatabase buildingData = new MyDatabase(this);
         Cursor readNames = buildingData.getBuildingNames();
         Cursor vertexData;
 

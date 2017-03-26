@@ -7,7 +7,7 @@
     <string name="medical">Medical Campus</string>
     <string name="tap_get_name">Tap a building to find its name!</string>
     <string name="building_chosen">&#160;selected.</string> <!--whitespace character-->
-    <string name="find_building">Search by acronym</string>
+    <string name="find_building">Search by name</string>
     <string name="not_found">Building not found.</string>
     <string name="go_to_CRC">Go to Charles River Campus</string>
     <string name="go_to_MED">Go to Medical Campus</string>
